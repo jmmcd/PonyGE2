@@ -1,13 +1,9 @@
-from algorithm.parameters import params
-from os import listdir, getcwd, path
+from utilities.helper_methods import get_Xy_train_test_separate
 import subprocess
 import json
-import sys
 
-class progsys:
+class ProgSys:
     """"""
-
-    INSERTCODE = "<insertCodeHere>"
 
     INDENTSPACE = "  "
     LOOPBREAK = "loopBreak"
@@ -21,34 +17,47 @@ class progsys:
 
     maximise = False
 
-    def __init__(self):
-        self.training, self.test, self.embed_header, self.embed_footer = self.get_data(params['DATASET'])
+    def __init__(self, alternate):
+        self.training, self.test, self.embed_header, self.embed_footer = get_data(alternate)
         self.eval = subprocess.Popen(['python', 'fitness/python_script_evaluation.py'],
                                 stdout=subprocess.PIPE,
                                 stdin=subprocess.PIPE)
-        if params['MULTICORE']:
-            print("Warming: Multicore is not supported with progsys as fitness function.\n"
-                  "Fitness function only allows sequential evaluation.")
 
-    def __call__(self, individual, dist="training"):
-        program = self.format_program(individual.phenotype, self.embed_header, self.embed_footer)
-        data = self.training if dist == "training" else self.test
-        program = "{}\n{}\n".format(data, program)
-        eval_json = json.dumps({'script': program, 'timeout': 1.0, 'variables': ['cases', 'caseQuality', 'quality']})
+        self.count = 0
+
+    def __call__(self, individual):  # , dist):
+        program = self.format_program(individual, self.embed_header, self.embed_footer)
+
+        program = self.training + '\n' + program + '\n'
+        eval_json = json.dumps({'script' : program, 'timeout' : 1.0, 'variables' : ['cases', 'caseQuality', 'quality']})
 
         self.eval.stdin.write((eval_json+'\n').encode())
         self.eval.stdin.flush()
+
         result_json = self.eval.stdout.readline()
 
         result = json.loads(result_json.decode())
+        # if dist == "test":
+        #     x = self.test_in
+        #     y = self.test_exp
+        # elif dist == "training":
+        #     x = self.training_in
+        #     y = self.training_exp
 
-        if 'quality' not in result:
-            result['quality'] = sys.maxsize
+        # self.count += 1
+        # if self.count == 10 and result['quality'] == 1559.046069859538:
+        #     print(individual)
+        #     print(result['quality'])
+
+        # if self.count == 10 and result['quality'] == 1696.7149730636077:
+        # print(individual)
+        # print(result['quality'])
         return result['quality']
 
     def format_program(self, individual, header, footer):
         lastNewLine = header.rindex('\n')
         indent = header[lastNewLine + len('\n'):len(header)]
+
         return header + self.format_individual(individual, indent) + footer
 
     def format_individual(self, code, additional_indent=""):
@@ -56,7 +65,9 @@ class progsys:
         indent = 0
         stringBuilder = ""
         forCounterNumber = 0
+
         first = True
+
         for part in parts:
             line = part.strip()
             # remove indentation if bracket is at the beginning of the line
@@ -80,7 +91,7 @@ class progsys:
             # remove indentation if bracket is at the end of the line
             while line.endswith(":}"):
                 indent -= 1
-                line = line[0:len(line) - 2].strip()
+                line = line.Substring[0:len(line) - 2].strip()
 
             if self.LOOPBREAKUNNUMBERED in line:
                 if self.LOOPBREAK_INITIALISE in line:
@@ -101,21 +112,20 @@ class progsys:
 
         return stringBuilder
 
-    def get_data(self, experiment):
-        """ Return the training and test data for the current experiment.
-        """
-        train_set = path.join("..", "datasets", "progsys",
-                              (experiment + "-Train.txt"))
-        test_set = path.join("..", "datasets", "progsys",
-                             (experiment + "-Test.txt"))
 
-        embed_file = path.join("..", "grammars", "progsys", (experiment + "-Embed.txt"))
-        with open(embed_file, 'r') as embed:
-            embed_code = embed.read()
-        insert = embed_code.index(self.INSERTCODE)
-        embed_header, embed_footer = "", ""
+INSERTCODE = "<insertCodeHere>"
+
+
+def get_data(alternate):
+    train_set = "datasets/" + alternate + "-Train.txt"
+    test_set = "datasets/" + alternate + "-Test.txt"
+    embed_file = "grammars/" + alternate + "-Embed.txt"
+    embed_header, embed_footer = "", ""
+    with open(embed_file, 'r') as embed:
+        embedCode = embed.read()
+        insert = embedCode.index(INSERTCODE)
         if insert > 0:
-            embed_header = embed_code[:insert]
-            embed_footer = embed_code[insert + len(self.INSERTCODE):]
-        with open(train_set, 'r') as train_file, open(test_set, 'r') as test_file:
-            return train_file.read(), test_file.read(), embed_header, embed_footer
+            embed_header = embedCode[:insert]
+            embed_footer = embedCode[insert + len(INSERTCODE):]
+    with open(train_set, 'r') as train, open(test_set, 'r') as test:
+        return train.read(), test.read(), embed_header, embed_footer
