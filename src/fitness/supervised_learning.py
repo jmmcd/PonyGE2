@@ -57,18 +57,19 @@ class supervised_learning:
 
         try:
             yhat = eval(phen)  # phen will refer to "x", created above
+            assert np.isrealobj(yhat)
 
             # if phen is a constant, eg 0.001 (doesn't refer to x),
             # then yhat will be a constant. that can confuse the error
             # metric.  so convert to a constant array.
-            if not isinstance(yhat, np.ndarray):
+            if not isinstance(yhat, np.ndarray) or len(yhat.shape) < 1:
                 yhat = np.ones_like(y) * yhat
 
             # let's always call the error function with the true values first,
             # the estimate second
             fitness = params['ERROR_METRIC'](y, yhat)
 
-        except (FloatingPointError, ZeroDivisionError):
+        except (FloatingPointError, ZeroDivisionError, OverflowError):
             # FP err can happen through eg overflow (lots of pow/exp calls)
             # ZeroDiv can happen when using unprotected operators
             fitness = default_fitness(self.maximise)
