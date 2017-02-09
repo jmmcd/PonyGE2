@@ -222,7 +222,12 @@ def set_params(command_line_args):
     from utilities.stats import trackers, clean_stats
 
     cmd_args, unknown = parser.parse_cmd_args(command_line_args)
-    # TODO: how should we handle unknown parameters? Should we just add them indiscriminately to the params dictionary?
+    if unknown:
+        s = """Unknown parameters: %s
+You may wish to check the spelling, add code to recognise this parameter,
+or use --extra_fitness_parameters""" % str(unknown)
+        raise Exception(s)
+
 
     # LOAD PARAMETERS FILE
     # NOTE that the parameters file overwrites all previously set parameters.
@@ -236,23 +241,23 @@ def set_params(command_line_args):
     if params['LOAD_STATE']:
         # Load run from state.
         from utilities.algorithm.state import load_state
-        
+
         # Load in state information.
         individuals = load_state(params['LOAD_STATE'])
 
         # Set correct search loop.
         from algorithm.search_loop import search_loop_from_state
         params['SEARCH_LOOP'] = search_loop_from_state
-        
+
         # Set population.
         setattr(trackers, "state_individuals", individuals)
-        
+
     else:
         # Elite size is set to either 1 or 1% of the population size, whichever is
         # bigger if no elite size is previously set.
         if params['ELITE_SIZE'] is None:
             params['ELITE_SIZE'] = return_percent(1, params['POPULATION_SIZE'])
-    
+
         # Set the size of a generation
         params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - params[
             'ELITE_SIZE']
@@ -260,10 +265,10 @@ def set_params(command_line_args):
         # Set correct param imports for specified function options, including
         # error metrics and fitness functions.
         set_param_imports()
-    
+
         # Clean the stats dict to remove unused stats.
         clean_stats.clean_stats()
-    
+
         # Initialise run lists and folders
         initialise_run_params()
 

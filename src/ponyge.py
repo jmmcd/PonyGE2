@@ -17,17 +17,17 @@ import sys
 
 def mane():
     """ Run program """
-    
+
     # Run evolution
     individuals = params['SEARCH_LOOP']()
-    
+
     # Print final review
     get_stats(individuals, end=True)
-    
+
     # Returns only needed if running experiment manager
     return params['TIME_STAMP'], stats['best_ever'].fitness
 
 
 if __name__ == "__main__":
-    set_params(sys.argv)
+    set_params(sys.argv[1:]) # exclude the ponyge.py arg itself
     mane()
