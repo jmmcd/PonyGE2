@@ -405,3 +405,10 @@ def subtree(p_0, p_1):
         ind1.invalid = invalid_1
 
     return [ind0, ind1]
+
+
+variable_onepoint.representation = "linear"
+fixed_onepoint.representation = "linear"
+variable_twopoint.representation = "linear"
+fixed_twopoint.representation = "linear"
+subtree.representation = "subtree"

@@ -133,3 +133,8 @@ def subtree(ind):
     ind.genome = ind.genome + tail
 
     return ind
+
+
+int_flip.representation = "linear"
+int_flip_per_ind.representation = "linear"
+subtree.representation = "subtree"

@@ -33,18 +33,13 @@ def mapper(genome, tree):
         # This is a fast way of creating a new unique copy of the genome
         # (prevents cross-contamination of information between individuals).
 
-        if params['GENOME_OPERATIONS'] and not params['PI_MAPPING']:
+        if params['GENOME_OPERATIONS']:
             # Can generate tree information faster using
             # algorithm.mapper.map_ind_from_genome() if we don't need to
             # store the whole tree.
             phenotype, genome, tree, nodes, invalid, depth, \
                 used_codons = map_ind_from_genome(genome)
 
-        elif params['GENOME_OPERATIONS'] and params['PI_MAPPING']:
-            # Map individual using Position Independent mapping.
-            phenotype, genome, tree, nodes, invalid, depth, \
-            used_codons = map_PI_ind_from_genome(genome)
-        
         else:
             # Build the tree using algorithm.mapper.map_tree_from_genome().
             phenotype, genome, tree, nodes, invalid, depth, \
@@ -171,134 +166,6 @@ def map_ind_from_genome(genome):
     output = "".join(output)
 
     if len(unexpanded_symbols) > 0:
-        # All non-terminals have not been completely expanded, invalid
-        # solution.
-        return None, genome, None, nodes, True, max_depth, used_input
-
-    if bnf_grammar.python_mode:
-        # Grammar contains python code
-
-        output = python_filter(output)
-
-    return output, genome, None, nodes, False, max_depth, used_input
-
-
-def map_PI_ind_from_genome(genome):
-    """
-    A fast Position Independent genotype to phenotype mapping process. Map
-    input via rules to output. Does not require the recursive tree class,
-    but still calculates tree information, e.g. number of nodes and maximum
-    depth. Uses Position Independent mapping to choose the next codon to map
-    from the genome.
-
-    :param genome: A genome to be mapped.
-    :return: Output in the form of a phenotype string ('None' if invalid),
-             Genome,
-             None (this is reserved for the derivation tree),
-             The number of nodes in the derivation,
-             A boolean flag for whether or not the individual is invalid,
-             The maximum depth of any node in the tree, and
-             The number of used codons.
-    """
-
-    # Create local variables to avoide multiple dictionary lookups
-    max_tree_depth, max_wraps = params['MAX_TREE_DEPTH'], params['MAX_WRAPS']
-    bnf_grammar = params['BNF_GRAMMAR']
-
-    # Get length of used input.
-    n_input = len(genome)
-
-    # Depth, max_depth, and nodes start from 1 to account for starting root
-    # Initialise number of wraps at -1 (since
-    used_input, current_depth, max_depth, nodes, wraps = 1, 1, 1, 1, -1
-
-    # Initialise the list of unexpanded non-terminals with the start rule.
-    production_queue = [[bnf_grammar.start_rule, 1]]
-
-    # Set initial position with which to pop items for mapping.
-    position, mask = 0, [0]
-    
-    while (wraps < max_wraps) and \
-            mask and \
-            (max_depth <= max_tree_depth):
-        # While there are unexpanded non-terminals in the production queue,
-        # and we  are below our wrapping limit, and we haven't breached our
-        # maximum tree depth, we can continue to map the genome.
-
-        if used_input % n_input == 0 and \
-                        used_input > 0 and \
-                any([i[0]["type"] == "NT" for i in production_queue]):
-            # If we have reached the end of the genome and unexpanded
-            # non-terminals remain, then we need to wrap back to the start
-            # of the genome again. Can break the while loop.
-            wraps += 1
-
-        
-        # Pick the index of the next item to expand from the unexpanded
-        # symbols list by using the genome.
-        mask_index = mask[genome[position % n_input] % len(mask)]
-        
-        # Pick the next production choice using the given index from the
-        # list of unexpanded non-terminals.
-        current_item = production_queue[mask_index]
-        current_symbol, current_depth = current_item[0], current_item[1]
-        
-        # Increment position counter (remember that PI operators use pairs
-        # of codons).
-        position += 2
-
-        if max_depth < current_depth:
-            # Set the new maximum depth.
-            max_depth = current_depth
-
-        # Current item is a new non-terminal by definition of the mask. Find
-        # associated production choices.
-        production_choices = bnf_grammar.rules[current_symbol[
-            "symbol"]]["choices"]
-        no_choices = bnf_grammar.rules[current_symbol["symbol"]][
-            "no_choices"]
-
-        # Select a production based on the next available codon in the
-        # genome.
-        current_production = genome[used_input % n_input] % no_choices
-
-        # Use an input
-        used_input += 2
-
-        # Initialise children as empty deque list.
-        children = []
-        nt_count = 0
-
-        for prod in production_choices[current_production]['choice']:
-            # iterate over all elements of chosen production rule.
-
-            child = [prod, current_depth + 1]
-
-            # Extendleft reverses the order, thus reverse adding.
-            children.append(child)
-            if child[0]["type"] == "NT":
-                nt_count += 1
-
-        # Insert the new children to the production queue in place of the
-        # previous non-terminal.
-        production_queue = production_queue[:mask_index] + \
-                           children + \
-                           production_queue[mask_index + 1:]
-
-        if nt_count > 0:
-            nodes += nt_count
-        else:
-            nodes += 1
-
-        # Set the new mask by finding the indexes of all NTs in the
-        # production queue.
-        mask = [production_queue.index(NT) for NT in production_queue if NT[
-            0]["type"] == "NT"]
-    
-    # Generate phenotype string.
-    output = "".join([T[0]['symbol'] for T in production_queue])
-
-    if len(mask) > 0:
         # All non-terminals have not been completely expanded, invalid
         # solution.
         return None, genome, None, nodes, True, max_depth, used_input

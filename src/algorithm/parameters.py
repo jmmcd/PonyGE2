@@ -253,21 +253,7 @@ def set_params(command_line_args):
         # Set the size of a generation
         params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - params[
             'ELITE_SIZE']
-    
-        # Set GENOME_OPERATIONS automatically for faster linear operations.
-        # TODO: there must be a cleaner way of doing this.
-        if params['MUTATION'] in ['operators.mutation.int_flip', 'int_flip'] \
-                and params['CROSSOVER'] in [
-                    'operators.crossover.fixed_onepoint',
-                    'operators.crossover.variable_onepoint',
-                    'operators.crossover.fixed_twopoint',
-                    'operators.crossover.variable_twopoint',
-                    'fixed_onepoint', 'variable_onepoint',
-                    'fixed_twopoint', 'variable_twopoint']:
-            params['GENOME_OPERATIONS'] = True
-        else:
-            params['GENOME_OPERATIONS'] = False
-            
+
         # Set correct param imports for specified function options, including
         # error metrics and fitness functions.
         set_param_imports()
@@ -277,7 +263,14 @@ def set_params(command_line_args):
     
         # Initialise run lists and folders
         initialise_run_params()
-    
+
+        # Set GENOME_OPERATIONS automatically for faster linear operations.
+        if params['CROSSOVER'].representation == "linear" and \
+                params['MUTATION'].representation == "linear":
+            params['GENOME_OPERATIONS'] = True
+        else:
+            params['GENOME_OPERATIONS'] = False
+
         # Parse grammar file and set grammar class.
         params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
                                                 params['GRAMMAR_FILE']))

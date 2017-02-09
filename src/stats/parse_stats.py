@@ -144,29 +144,35 @@ def parse_stat_from_runs(experiment_name, stats, graph):
     
     # Find list of all runs contained in the specified folder.
     runs = [run for run in listdir(file_path) if "." not in run]
-    
+
+    # Place to store the header for full stats file.
+    header = ""
+
+    # Array to store all stats
+    full_stats = []
+
     for stat in stats:
         # Iterate over all specified stats.
-        
+
         if stat == "best_ever":
             print("Error: Cannot graph instances of individual class. Do not"
                   " specify 'best_ever' as stat to be parsed.")
             quit()
-        
+
         summary_stats = []
 
         # Iterate over all runs
         for run in runs:
             # Get file name
             file_name = path.join(file_path, str(run), "stats.tsv")
-            
+
             # Load in data
             data = pd.read_csv(file_name, sep="\t")
-            
+
             try:
                 # Try to extract specific stat from the data.
                 summary_stats.append(list(data[stat]))
-            
+
             except KeyError:
                 # The requested stat doesn't exist.
                 print("Error: stat", stat, "does not exist")
@@ -181,19 +187,37 @@ def parse_stat_from_runs(experiment_name, stats, graph):
                                                        "%H:%M:%S.%f") -
                                      zero).total_seconds()
                                     for time in run]
-        
+
         # Generate numpy array of all stats
-        summary_stats = np.asarray(summary_stats)
+        summary_stats = np.array(summary_stats)
+
+        # Append Stat to header.
+        header = header + stat + "_mean" + ","
+
+        summary_stats_mean = np.nanmean(summary_stats, axis=0)
+        full_stats.append(summary_stats_mean)
+
+        # Append Stat to header.
+        header = header + stat + "_std" + ","
+        summary_stats_std = np.nanstd(summary_stats, axis=0)
+        full_stats.append(summary_stats_std)
         summary_stats = np.transpose(summary_stats)
-        
+
         # Save stats as a .csv file.
         np.savetxt(path.join(file_path, (stat + ".csv")), summary_stats,
                    delimiter=",")
-        
+
         if graph:
             # Graph stat by calling graphing function.
             save_average_plot_across_runs(path.join(file_path, (stat +
                                                                 ".csv")))
+    # Convert and rotate full stats
+    full_stats = np.array(full_stats)
+    full_stats = np.transpose(full_stats)
+
+    # Save full stats to csv file.
+    np.savetxt(path.join(file_path, "full_stats.csv"), full_stats,
+               delimiter = ",", header=header[:-1])
 
 
 def save_average_plot_across_runs(filename):
