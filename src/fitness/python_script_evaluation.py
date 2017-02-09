@@ -4,10 +4,7 @@ import sys
 from queue import Empty
 from types import ModuleType
 import logging
-logging.basicConfig(filename='python_log.txt', format='%(asctime)s:%(process)d:%(thread)d:%(message)s', level=logging.DEBUG) # set to DEBUG for debug info ;)
-
-#import os
-#logging.basicConfig(filename='python_log_' + str(os.getpid()) + '.txt', format='%(asctime)s:%(process)d:%(thread)d:%(message)s', level=logging.DEBUG) # set to DEBUG for debug info ;)
+logging.basicConfig(filename='python_log.txt', format='%(asctime)s:%(process)d:%(thread)d:%(message)s', level=logging.INFO)  # set to DEBUG for debug info ;)
 
 
 class Worker(mp.Process):
@@ -42,7 +39,7 @@ class Worker(mp.Process):
                     self.produce.put({key: value for key, value in help_globals.items()
                                       if not callable(value) and             # cannot be a function
                                       not isinstance(value, ModuleType) and  # cannot be a module
-                                      key not in ['__builtins__', 'stop']})  # cannot be built ins or synchronized objects
+                                      key not in ['__builtins__', 'stop']})  # cannot be builtins or synchronized objects
                 del help_globals
             else:
                 break
@@ -67,9 +64,17 @@ if __name__ == '__main__':
             if not p.join(5):
                 p.terminate()
             break
-        logging.debug('sadf')
 
-        message_dict = json.loads(message)
+        # do not trust user input
+        try:
+            message_dict = json.loads(message)
+        except json.decoder.JSONDecodeError as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            exception = '{} {} {}'.format(exc_type, exc_obj, e.args)
+            logging.debug(exception)
+            logging.debug(message)
+            print(json.dumps({'exception': exception}), flush=True)
+            continue
         consume.put(message_dict['script'])
         try:
             results = produce.get(block=True, timeout=message_dict['timeout'])
@@ -99,6 +104,6 @@ if __name__ == '__main__':
             ret_message_dict = {}
             for v in message_dict['variables']:
                 if v in results:
-                    ret_message_dict[v] = results[v]
+                    ret_message_dict[v] = list(results[v]) if isinstance(results[v], set) else results[v]
             print(json.dumps(ret_message_dict), flush=True)
             logging.debug('Sent output normal')

@@ -68,6 +68,7 @@ def get_data(experiment, file_type="txt"):
         exp = dataset.split('.')[0].split('-')[0]
         if exp == experiment:
             file_type = dataset.split('.')[1]
+            break
     train_set = path.join("..", "datasets",
                           (experiment + "-Train." + str(file_type)))
     test_set = path.join("..", "datasets",
