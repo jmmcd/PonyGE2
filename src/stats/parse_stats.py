@@ -90,7 +90,10 @@ def parse_opts(command_line_args):
         
         elif opt == "--stats":
             # List stats. Stats must be parsed correctly.
-            # TODO: There must be a better way to pass in a list of options.
+            # TODO: There must be a better way to pass in a list of options,
+            #  load in a single file to get the header for ech directory and
+            #  then use fulls stats. Might be abble to use pandas for this
+            # join operation.
             if arg[0] == "[" and arg[-1] == "]":
                 stats = arg[1:-1].split(",")
             
