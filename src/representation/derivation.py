@@ -183,14 +183,6 @@ def pi_random_derivation(tree, max_depth):
         
         # Pick a random item from the queue.
         chosen = randint(0, len(queue)-1)
-
-        # Generate position production_codon.
-        position_codon = randrange(len(queue),
-                                   params['BNF_GRAMMAR'].codon_size,
-                                   len(queue)) + chosen
-
-        # Insert position codon into the genome.
-        genome.append(position_codon)
         
         # Pop the next item from the queue.
         all_node = queue.pop(chosen)
@@ -213,19 +205,18 @@ def pi_random_derivation(tree, max_depth):
         # Randomly pick a production choice.
         chosen_prod = choice(available)
 
-        # Find the index of the chosen production and set a matching
-        # production codon based on that index.
+        # Find the index of the chosen production and set a matching codon
+        # based on that index.
         prod_index = productions['choices'].index(chosen_prod)
-        production_codon = randrange(productions['no_choices'],
+        codon = randrange(productions['no_choices'],
                           params['BNF_GRAMMAR'].codon_size,
                           productions['no_choices']) + prod_index
 
-        # Set the codon for the current node and append production codon to
-        # the genome.
-        node.codon = production_codon
+        # Set the codon for the current node and append codon to the genome.
+        node.codon = codon
 
-        # Insert production codon into the genome.
-        genome.append(production_codon)
+        # Insert codon into the genome.
+        genome.append(codon)
 
         # Initialise empty list of children for current node.
         node.children = []
@@ -287,14 +278,6 @@ def pi_grow(tree, max_depth):
         # Pick a random item from the queue.
         chosen = randint(0, len(queue) - 1)
 
-        # Generate position production_codon.
-        position_codon = randrange(len(queue),
-                          params['BNF_GRAMMAR'].codon_size,
-                          len(queue)) + chosen
-
-        # Insert position codon into the genome.
-        genome.append(position_codon)
-
         # Pop the next item from the queue.
         all_node = queue.pop(chosen)
         node, recursive = all_node[0], all_node[0]
@@ -334,19 +317,18 @@ def pi_grow(tree, max_depth):
         # Randomly pick a production choice.
         chosen_prod = choice(available)
 
-        # Find the index of the chosen production and set a matching
-        # production codon based on that index.
+        # Find the index of the chosen production and set a matching codon
+        # based on that index.
         prod_index = productions['choices'].index(chosen_prod)
-        production_codon = randrange(productions['no_choices'],
+        codon = randrange(productions['no_choices'],
                           params['BNF_GRAMMAR'].codon_size,
                           productions['no_choices']) + prod_index
 
-        # Set the production codon for the current node and append
-        # production_codon to the genome.
-        node.codon = production_codon
+        # Set the codon for the current node and append codon to the genome.
+        node.codon = codon
 
-        # Insert production codon into the genome.
-        genome.append(production_codon)
+        # Insert codon into the genome.
+        genome.append(codon)
             
         # Initialise empty list of children for current node.
         node.children = []

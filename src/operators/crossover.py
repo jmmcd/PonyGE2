@@ -407,6 +407,7 @@ def subtree(p_0, p_1):
     return [ind0, ind1]
 
 
+# Set attributes for all operators to define linear or subtree representations.
 variable_onepoint.representation = "linear"
 fixed_onepoint.representation = "linear"
 variable_twopoint.representation = "linear"

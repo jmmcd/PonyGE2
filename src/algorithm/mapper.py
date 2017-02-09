@@ -60,7 +60,7 @@ def mapper(genome, tree):
             used_codons, phenotype = len(_input), "".join(output)
             depth += 1  # because get_tree_info under-counts by 1.
 
-        genome = _input
+            genome = _input
 
     return phenotype, genome, tree, nodes, invalid, depth, used_codons
 
