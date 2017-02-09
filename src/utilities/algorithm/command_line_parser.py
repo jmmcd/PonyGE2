@@ -86,7 +86,7 @@ def parse_cmd_args(arguments):
                         help='Sets the desired search step function.')
 
     # POPULATION OPTIONS
-    parser.add_argument('--population',
+    parser.add_argument('--population_size',
                         dest='POPULATION_SIZE',
                         type=int,
                         help='Sets the population size, requires int value.')
@@ -314,7 +314,7 @@ def parse_cmd_args(arguments):
                         default=None,
                         action='store_true',
                         help='Saves plots for best fitness.')
-    
+
     # STATE SAVING/LOADING
     parser.add_argument('--save_state',
                         dest='SAVE_STATE',
