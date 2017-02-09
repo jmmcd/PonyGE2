@@ -34,6 +34,12 @@ def f1_score(y, yhat):
     precision and recall, ie both true positives and true negatives.
     For F_1 score higher is better."""
 
+    # if phen is a constant, eg 0.001 (doesn't refer to x), then yhat
+    # will be a constant. that will break f1_score. so convert to a
+    # constant array.
+    if not isinstance(yhat, np.ndarray) or len(yhat.shape) < 1:
+        yhat = np.ones_like(y) * yhat
+
     # convert real values to boolean with a zero threshold
     yhat = (yhat > 0)
     # this can give a runtime warning because if we predict the same

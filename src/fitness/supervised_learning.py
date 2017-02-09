@@ -59,12 +59,6 @@ class supervised_learning:
             yhat = eval(phen)  # phen will refer to "x", created above
             assert np.isrealobj(yhat)
 
-            # if phen is a constant, eg 0.001 (doesn't refer to x),
-            # then yhat will be a constant. that can confuse the error
-            # metric.  so convert to a constant array.
-            if not isinstance(yhat, np.ndarray) or len(yhat.shape) < 1:
-                yhat = np.ones_like(y) * yhat
-
             # let's always call the error function with the true values first,
             # the estimate second
             fitness = params['ERROR_METRIC'](y, yhat)
