@@ -2,6 +2,8 @@ from datetime import datetime
 from time import time
 from random import seed
 from sys import version_info
+from socket import gethostname
+from os import getpid
 
 from algorithm.parameters import params
 from stats.stats import generate_folders_and_files
@@ -39,9 +41,14 @@ def initialise_run_params():
 
     # Generate a time stamp for use with folder and file names.
     hms = "%02d%02d%02d" % (start.hour, start.minute, start.second)
-    params['TIME_STAMP'] = (str(start.year)[2:] + "_" + str(start.month) +
-                            "_" + str(start.day) + "_" + hms +
-                            "_" + str(start.microsecond))
+    params['TIME_STAMP'] = "_".join([gethostname(),
+                                     str(params['RANDOM_SEED']),
+                                     str(getpid()),
+                                     str(start.year)[2:],
+                                     str(start.month),
+                                     str(start.day),
+                                     hms,
+                                     str(start.microsecond)])
     if not params['SILENT']:
         print("\nStart:\t", start, "\n")
 
