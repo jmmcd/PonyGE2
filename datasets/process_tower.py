@@ -62,3 +62,16 @@ print(df_test.head())
 colnames = ["#x1", "x4", "x6", "x12", "x23", "y"] # add a comment symbol to header
 df_train.to_csv("Tower-Train.txt", sep="\t", index=False, header=colnames)
 df_test.to_csv("Tower-Test.txt", sep="\t", index=False, header=colnames)
+
+def normalise(x, minv, maxv):
+    return (x - minv) / (maxv - minv)
+
+col = "towerResponse"
+minv = df_train[col].min()
+maxv = df_train[col].max()
+
+df_train[col] = normalise(df_train[col], minv, maxv)
+df_test[col] = normalise(df_test[col], minv, maxv)
+
+df_train.to_csv("TowerNorm-Train.txt", sep="\t", index=False, header=colnames)
+df_test.to_csv("TowerNorm-Test.txt", sep="\t", index=False, header=colnames)
