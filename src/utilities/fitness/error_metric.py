@@ -7,6 +7,7 @@ def mae(y, yhat):
     return np.mean(np.abs(y - yhat))
 mae.maximise = False
 
+
 def rmse(y, yhat):
     """Calculate root mean square error between inputs."""
     return np.sqrt(np.mean(np.square(y - yhat)))

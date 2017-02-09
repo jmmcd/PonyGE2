@@ -26,7 +26,7 @@ MUTATION:               int_flip
 MUTATION_EVENTS:        1
 MUTATION_PROBABILITY:   None
 POPULATION_SIZE:        500
-FITNESS_FUNCTION:       regression
+FITNESS_FUNCTION:       supervised_learning
 RANDOM_SEED:            None
 REPLACEMENT:            generational
 SAVE_ALL:               False

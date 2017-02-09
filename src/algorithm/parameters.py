@@ -21,10 +21,11 @@ params = {
         'EXPERIMENT_NAME': None,
 
         # Class of problem
-        'FITNESS_FUNCTION': "regression",
+        'FITNESS_FUNCTION': "supervised_learning",
         # "regression"
         # "string_match"
         # "classification"
+        # "supervised_learning"
 
         # Select problem dataset
         'DATASET': "Vladislavleva4",
@@ -39,6 +40,7 @@ params = {
         # "Dow.bnf"
         # "Banknote.bnf"
         # "letter.bnf"
+        # "supervised_learning.bnf"
 
         # Select error metric
         'ERROR_METRIC': None,
@@ -60,9 +62,10 @@ params = {
         'MAX_WRAPS': 0,
 
         # INITIALISATION
-        'INITIALISATION': "operators.initialisation.rhh",
+        'INITIALISATION': "operators.initialisation.PI_grow",
         # "operators.initialisation.uniform_genome"
         # "operators.initialisation.rhh"
+        # "operators.initialisation.PI_grow"
         'MAX_INIT_TREE_DEPTH': 10,
         # Set the maximum tree depth for initialisation.
         'MIN_INIT_TREE_DEPTH': None,

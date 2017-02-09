@@ -4,7 +4,7 @@ CROSSOVER:              variable_onepoint
 CROSSOVER_PROBABILITY:  0.75
 DATASET:                Banknote
 DEBUG:                  False
-ERROR_METRIC:           inverse_f1_score
+ERROR_METRIC:           f1_score
 EXPERIMENT_NAME:        None
 GENERATIONS:            50
 GENOME_INIT:            False
@@ -26,7 +26,7 @@ MUTATION:               int_flip
 MUTATION_EVENTS:        1
 MUTATION_PROBABILITY:   None
 POPULATION_SIZE:        500
-FITNESS_FUNCTION:       classification
+FITNESS_FUNCTION:       supervised_learning
 RANDOM_SEED:            None
 REPLACEMENT:            generational
 SAVE_ALL:               False
