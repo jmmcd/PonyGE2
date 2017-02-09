@@ -1,7 +1,7 @@
 <e>  ::=  (<e>+<e>) |
 	 	  (<e>-<e>) |
 		  (<e>*<e>) |
-		  aq(<e>) |
+		  aq(<e>,<e>) |
 		  x[<varidx>] |
 		  <c>
 <varidx> ::= GE_RANGE:dataset_n_vars
