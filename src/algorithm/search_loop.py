@@ -1,20 +1,8 @@
-from stats.stats import stats, get_stats
 from algorithm.parameters import params
-from algorithm import step, evaluation
-from utilities.trackers import cache
-
-
-def search_loop_wheel():
-    """
-    Allows the user to select different main search functions.
-    
-    :return: The returns of the main search loop function.
-    """
-    
-    if params['COMPLETE_EVALS']:
-        return search_loop_complete_evals()
-    else:
-        return search_loop()
+from fitness.evaluation import evaluate_fitness
+from stats.stats import stats, get_stats
+from utilities.algorithm.state import create_state
+from utilities.stats import trackers
 
 
 def search_loop():
@@ -30,7 +18,7 @@ def search_loop():
     individuals = params['INITIALISATION'](params['POPULATION_SIZE'])
 
     # Evaluate initial population
-    individuals = evaluation.evaluate_fitness(individuals)
+    individuals = evaluate_fitness(individuals)
 
     # Generate statistics for run so far
     get_stats(individuals)
@@ -40,43 +28,38 @@ def search_loop():
         stats['gen'] = generation
 
         # New generation
-        individuals = step.step(individuals)
+        individuals = params['STEP'](individuals)
 
         # Generate statistics for run so far
         get_stats(individuals)
+
+        if params['SAVE_STATE'] and not params['DEBUG'] and \
+                                generation % params['SAVE_STATE_STEP'] == 0:
+            # Save the state of the current evolutionary run.
+            create_state(individuals)
 
     return individuals
 
 
-def search_loop_complete_evals():
+def search_loop_from_state():
     """
-    This is a non-standard search process for an evolutionary algorithm. Loop
-    over a given number of total fitness evaluations rather than a set
-    number of generations. May run for more generations than are set in
-    params['GENERATIONS'].
-    
+    Run the evolutionary search process from a loaded state. Pick up where
+    it left off previously.
+
     :return: The final population after the evolutionary process has run for
-    the specified number of fitness evaluations.
+    the specified number of generations.
     """
-
-    # Initialise population
-    individuals = params['INITIALISATION'](params['POPULATION_SIZE'])
-
-    # Evaluate initial population
-    individuals = evaluation.evaluate_fitness(individuals)
-
-    # Generate statistics for run so far
-    get_stats(individuals)
-
-    # Runs for a specified number of fitness evaluations
-    while len(cache) < (params['GENERATIONS'] * params['POPULATION_SIZE']):
-
-        stats['gen'] += 1
-
+    
+    individuals = trackers.state_individuals
+        
+    # Traditional GE
+    for generation in range(stats['gen'] + 1, (params['GENERATIONS'] + 1)):
+        stats['gen'] = generation
+        
         # New generation
-        individuals = step.step(individuals)
-
+        individuals = params['STEP'](individuals)
+        
         # Generate statistics for run so far
         get_stats(individuals)
-
+    
     return individuals

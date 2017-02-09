@@ -1,10 +1,13 @@
-from os import getcwd, listdir
-from datetime import datetime
-import pandas as pd
-import numpy as np
-import matplotlib
 import getopt
 import sys
+from datetime import datetime
+from os import getcwd, listdir, path, pathsep
+
+import matplotlib
+import numpy as np
+np.seterr(all="raise")
+import pandas as pd
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 plt.rc('font', family='Times New Roman')
@@ -13,6 +16,7 @@ plt.rc('font', family='Times New Roman')
 def help_message():
     """
     Prints a help message to explain the usage of this file.
+    
     :return: Nothing
     """
     
@@ -31,7 +35,9 @@ def help_message():
                               "stats.stats.stats dictionary. "
                               "IMPORTANT: MUST NOT CONTAIN ANY SPACES."],
                ["\t--graph:", "Saves a .pdf figure of each stat specified."]]
-    
+
+    # This simply justifies the print statement such that it is visually
+    # pleasing to look at.
     for line in lines_1:
         print(line)
     col_width = max(len(line[0]) for line in lines_2)
@@ -43,6 +49,7 @@ def parse_opts(command_line_args):
     """
     Parses command line arguments and returns usable variables which are used
     as inputs for other functions in this file.
+    
     :param command_line_args: flags passed in from the command line at
     execution
     :return: experiment_name: the name of the containing folder of results,
@@ -70,18 +77,28 @@ def parse_opts(command_line_args):
 
     experiment_name, stats, graph = None, None, False
     
+    # iterate over all arguments in the option parser.
     for opt, arg in opts:
         if opt == "--help":
+            # Print help message.
             help_message()
             exit()
+        
         elif opt == "--experiment_name":
+            # Set experiment name (i.e. containing folder for multiple runs).
             experiment_name = arg
+        
         elif opt == "--stats":
+            # List stats. Stats must be parsed correctly.
+            # TODO: There must be a better way to pass in a list of options.
             if arg[0] == "[" and arg[-1] == "]":
                 stats = arg[1:-1].split(",")
+            
             else:
                 stats = arg.split(",")
+        
         elif opt == "--graph":
+            # Set boolean flag for graphing stats.
             graph = True
     
     return experiment_name, stats, graph
@@ -109,55 +126,74 @@ def parse_stat_from_runs(experiment_name, stats, graph):
     :param experiment_name: The name of a collecting folder within the
     ./results folder which holds multiple runs.
     :param stats: A list of the names of the stats to be parsed.
+    :param graph: A boolean flag for whether or not to save figure.
     :return: Nothing.
     """
 
-    path = getcwd()
-    if sys.platform == 'win32':
-        slash = "\\"
-    else:
-        slash = "/"
-    if path.split(slash)[-1] == "stats":
-        path = slash.join(path.split(slash)[:-1]) + slash + "results" + slash
-    else:
-        path = path + slash + "results" + slash
+    # Since results files are not kept in source directory, need to escape
+    # one folder.
+    file_path = path.join(getcwd(), "..", "results")
 
+    # Check for use of experiment manager.
     if experiment_name:
-        path += experiment_name + slash
+        file_path = path.join(file_path, experiment_name)
+    
     else:
         print("Error: experiment name not specified")
         quit()
     
-    runs = [run for run in listdir(path) if "." not in run]
+    # Find list of all runs contained in the specified folder.
+    runs = [run for run in listdir(file_path) if "." not in run]
     
     for stat in stats:
+        # Iterate over all specified stats.
+        
         if stat == "best_ever":
             print("Error: Cannot graph instances of individual class. Do not"
                   " specify 'best_ever' as stat to be parsed.")
             quit()
+        
         summary_stats = []
 
+        # Iterate over all runs
         for run in runs:
-            data = pd.read_csv(path + str(run) + "/stats.tsv", sep="\t")
+            # Get file name
+            file_name = path.join(file_path, str(run), "stats.tsv")
+            
+            # Load in data
+            data = pd.read_csv(file_name, sep="\t")
+            
             try:
+                # Try to extract specific stat from the data.
                 summary_stats.append(list(data[stat]))
+            
             except KeyError:
+                # The requested stat doesn't exist.
                 print("Error: stat", stat, "does not exist")
                 quit()
 
         if stat in ["total_time", "time_taken"]:
+            # Must parse time-related stats to the correct time format.
             zero = datetime.strptime("1900-01-01 0:00:00.000000",
                                      "%Y-%m-%d %H:%M:%S.%f")
             for i, run in enumerate(summary_stats):
                 summary_stats[i] = [(datetime.strptime(time,
-                                                       "%H:%M:%S.%f") - zero).total_seconds()
+                                                       "%H:%M:%S.%f") -
+                                     zero).total_seconds()
                                     for time in run]
-                
+        
+        # Generate numpy array of all stats
         summary_stats = np.asarray(summary_stats)
         summary_stats = np.transpose(summary_stats)
-        np.savetxt(path + stat + ".csv", summary_stats, delimiter=",")
+        
+        # Save stats as a .csv file.
+        np.savetxt(path.join(file_path, (stat + ".csv")), summary_stats,
+                   delimiter=",")
+        
         if graph:
-            save_average_plot_across_runs(path + stat + ".csv")
+            # Graph stat by calling graphing function.
+            save_average_plot_across_runs(path.join(file_path, (stat +
+                                                                ".csv")))
 
 
 def save_average_plot_across_runs(filename):
@@ -184,29 +220,45 @@ def save_average_plot_across_runs(filename):
     :return: Nothing.
     """
     
-    stat_name = filename.split("/")[-1].split(".")[0]
+    # Get stat name from the filename. Used later for saving graph.
+    stat_name = filename.split(pathsep)[-1].split(".")[0]
     
+    # Load in data.
     data = np.genfromtxt(filename, delimiter=',')[:, :-1]
+    
+    # Generate average and standard deviations of loaded data.
     ave = np.nanmean(data, axis=1)
     std = np.nanstd(data, axis=1)
-    max_gens = len(ave)
     
+    # Calculate max and min of standard deviation.
     stdmax = ave + std
     stdmin = ave - std
+    
+    # Generate generation range over which data is to be graphed.
+    max_gens = len(ave)
     r = range(1, max_gens + 1)
     
+    # Initialise figure plot.
     fig = plt.figure()
     ax1 = fig.add_subplot(1, 1, 1)
     
+    # Plot data and standard deviation infill.
     ax1.plot(r, ave, color="blue")
-    plt.xlim(0, max_gens + 1)
     ax1.fill_between(r, stdmin, stdmax, color="DodgerBlue", alpha=0.5)
+
+    # Set x-axis limits.
+    plt.xlim(0, max_gens + 1)
     
+    # Set title and axes.
     plt.title("Average " + stat_name)
     plt.xlabel('Generation', fontsize=14)
     plt.ylabel('Average ' + stat_name, fontsize=14)
-    new_filename = filename.split(".")[0]
-    plt.savefig(str(new_filename) + ".pdf")
+    
+    # Save graph under the same name as the original .csv file but with a
+    # .pdf extension instead.
+    new_filename = filename[:-3] + "pdf"
+    plt.savefig(str(new_filename))
+    
     plt.close()
 
 

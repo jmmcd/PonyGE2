@@ -1,7 +1,6 @@
 from multiprocessing import cpu_count
+from os import path
 from socket import gethostname
-from random import seed
-import time
 
 hostname = gethostname().split('.')
 machine_name = hostname[0]
@@ -9,42 +8,65 @@ machine_name = hostname[0]
 
 """Algorithm parameters"""
 params = {
+        # Set default step and search loop functions
+        'SEARCH_LOOP': 'search_loop',
+        'STEP': 'step',
+
         # Evolutionary Parameters
         'POPULATION_SIZE': 500,
         'GENERATIONS': 50,
+        'HILL_CLIMBING_HISTORY': 1000,
 
         # Set optional experiment name
         'EXPERIMENT_NAME': None,
 
         # Class of problem
-        'PROBLEM': "regression",
+        'FITNESS_FUNCTION': "regression",
         # "regression"
         # "string_match"
         # "classification"
 
-        # Select Regression Problem Suite
-        'SUITE': "Vladislavleva4",
+        # Select problem dataset
+        'DATASET': "Vladislavleva4",
         # "Dow"
         # "Keijzer6"
         # "Vladislavleva4"
 
-        # Specify String for StringMatch Problem
-        'STRING_MATCH_TARGET': "ponyge_rocks",
+        # Set grammar file
+        'GRAMMAR_FILE': "Vladislavleva4.bnf",
+        # "Vladislavleva4.bnf"
+        # "Keijzer6.bnf"
+        # "Dow.bnf"
+        # "Banknote.bnf"
+        # "letter.bnf"
+
+        # Select error metric
+        'ERROR_METRIC': None,
+        # "mse"
+        # "mae"
+        # "rmse"
+        # "hinge"
+        # "f1_score"
+
+        # Specify target for target problems
+        'TARGET': "ponyge_rocks",
 
         # Set max sizes of individuals
         'MAX_TREE_DEPTH': 17,
+        'MAX_TREE_NODES': None,
         'CODON_SIZE': 100000,
-        'GENOME_LENGTH': 500,
+        'MAX_INIT_GENOME_LENGTH': 200,
+        'MAX_GENOME_LENGTH': 500,
+        'MAX_WRAPS': 0,
 
         # INITIALISATION
         'INITIALISATION': "operators.initialisation.rhh",
-        # "operators.initialisation.random_init"
+        # "operators.initialisation.uniform_genome"
         # "operators.initialisation.rhh"
-        'MAX_INIT_DEPTH': 10,
+        'MAX_INIT_TREE_DEPTH': 10,
         # Set the maximum tree depth for initialisation.
-        'GENOME_INIT': False,
-        # If True, initialises individuals by generating random genomes (i.e.
-        # doesn't use trees to initialise individuals).
+        'MIN_INIT_TREE_DEPTH': None,
+        # Set the minimum tree depth for initialisation.
 
         # SELECTION
         'SELECTION': "operators.selection.tournament",
@@ -58,10 +80,12 @@ params = {
         # Allow for selection of invalid individuals during selection process.
 
         # CROSSOVER
-        'CROSSOVER': "operators.crossover.onepoint",
-        # "operators.crossover.onepoint",
+        'CROSSOVER': "operators.crossover.variable_onepoint",
+        # "operators.crossover.fixed_onepoint",
         # "operators.crossover.subtree",
         'CROSSOVER_PROBABILITY': 0.75,
+        'NO_CROSSOVER_INVALIDS': False,
+        # Prevents crossover from generating invalids.
 
         # MUTATION
         'MUTATION': "operators.mutation.int_flip",
@@ -69,6 +93,8 @@ params = {
         # "operators.mutation.int_flip",
         'MUTATION_PROBABILITY': None,
         'MUTATION_EVENTS': 1,
+        'NO_MUTATION_INVALIDS': False,
+        # Prevents mutation from generating invalids.
 
         # REPLACEMENT
         'REPLACEMENT': "operators.replacement.generational",
@@ -101,6 +127,18 @@ params = {
         # Multiprocessing of phenotype evaluations.
         'CORES': cpu_count(),
 
+        # STATE SAVING/LOADING
+        'SAVE_STATE': False,
+        # Saves the state of the evolutionary run every generation. You can
+        # specify how often you want to save the state with SAVE_STATE_STEP.
+        'SAVE_STATE_STEP': 1,
+        # Specifies how often the state of the current evolutionary run is
+        # saved (i.e. every n-th generation). Requires int value.
+        'LOAD_STATE': None,
+        # Loads an evolutionary run from a saved state. You must specify the
+        # full file path to the desired state file. Note that state files have
+        # no file type.
+
         # CACHING
         'CACHE': False,
         # The cache tracks unique individuals across evolution by saving a
@@ -117,10 +155,6 @@ params = {
         # Removes duplicate individuals from the population by replacing them
         # with mutated versions of the original individual. Hopefully this will
         # encourage diversity in the population.
-        'COMPLETE_EVALS': False,
-        # Using the cache doesn't execute the full number of fitness
-        # evaluations. Use this to continue the run in order to execute the
-        # full number of fitness evaluations.
 
         # Set machine name (useful for doing multiple runs)
         'MACHINE': machine_name,
@@ -130,42 +164,39 @@ params = {
 }
 
 
-def check_int(param, arg):
+def load_params(file_name):
     """
-    Checks to ensure the given argument is indeed an int. If not, throws an
-    error.
-    
-    :param param: A parameter from the params dictionary.
-    :param arg: A given input argument.
-    :return: Error if an error occurs, nothing if no error.
+    Load in a params text file and set the params dictionary directly.
+
+    :param file_name: The name/location of a parameters file.
+    :return: Nothing.
     """
 
     try:
-        params[param] = int(arg)
-    except:
-        print("\nError: Please define", param, "as int. Value given:", arg)
+        open(file_name, "r")
+    except FileNotFoundError:
+        print("Error: Parameters file not found. Ensure file\n"
+              "       extension is specified, e.g. "
+              "'regression.txt'.")
         quit()
 
+    with open(file_name, 'r') as parameters:
+        # Read the whole parameters file.
+        content = parameters.readlines()
 
-def check_float(param, arg):
-    """
-    Checks to ensure the given argument is indeed a float. If not, throws an
-    error. Also checks to ensure the given float is within the range [0:1].
-    
-    :param param: A parameter from the params dictionary.
-    :param arg: A given input argument.
-    :return: Error if an error occurs, nothing if no error.
-    """
+        for line in content:
+            components = line.split(":")
+            key, value = components[0], components[1].strip()
 
-    try:
-        params[param] = float(arg)
-    except:
-        print("\nError: Please define", param, "as float. Value given:", arg)
-        quit()
-    if not 1 >= params[param] >= 0:
-        print("\nError:", param, "outside allowed range [0:1]. Value "
-                                 "given:", arg)
-        quit()
+            # Evaluate parameters.
+            try:
+                value = eval(value)
+            except:
+                # We can't evaluate, leave value as a string.
+                pass
+
+            # Set parameter
+            params[key] = value
 
 
 def set_params(command_line_args):
@@ -175,187 +206,78 @@ def set_params(command_line_args):
     seeds, elite size). Sets the correct imports given command line
     arguments. Sets correct grammar file and fitness function. Also
     initialises save folders and tracker lists in utilities.trackers.
-    
+
     :param command_line_args: Command line arguments specified by the user.
     :return: Nothing.
     """
-    
-    from fitness.fitness_wheel import set_fitness_function, set_fitness_params
-    from utilities.initialise_run import initialise_run_params
-    from utilities.initialise_run import set_param_imports
-    from utilities.helper_methods import return_percent
-    from utilities.help_message import help_message
+
+    from utilities.algorithm.initialise_run import initialise_run_params
+    from utilities.algorithm.initialise_run import set_param_imports
+    from utilities.fitness.math_functions import return_percent
     from representation import grammar
-    import getopt
+    import utilities.algorithm.command_line_parser as parser
+    from utilities.stats import trackers, clean_stats
 
-    try:
-        opts, args = getopt.getopt(command_line_args[1:], "",
-                                   ["help", "debug", "population=",
-                                    "generations=", "initialisation=",
-                                    "max_init_depth=", "genome_init",
-                                    "max_tree_depth=", "codon_size=",
-                                    "selection=", "selection_proportion=",
-                                    "tournament_size=", "crossover=",
-                                    "crossover_probability=", "replacement=",
-                                    "mutation=", "mutation_events=",
-                                    "random_seed=", "bnf_grammar=", "problem=",
-                                    "problem_suite=", "target_string=",
-                                    "verbose", "elite_size=", "save_all",
-                                    "save_plots", "cache", "lookup_fitness",
-                                    "lookup_bad_fitness", "mutate_duplicates",
-                                    "complete_evals", "genome_length=",
-                                    "invalid_selection", "silent",
-                                    "dont_lookup_fitness", "experiment_name=",
-                                    "multicore", "cores="])
-    except getopt.GetoptError as err:
-        print("Most parameters need a value associated with them \n",
-              "Run python ponyge.py --help for more info")
-        print(str(err))
-        exit(2)
+    cmd_args, unknown = parser.parse_cmd_args(command_line_args)
+    # TODO: how should we handle unknown parameters? Should we just add them indiscriminately to the params dictionary?
 
-    for opt, arg in opts:
-        if opt == "--help":
-            help_message()
-            exit()
+    # LOAD PARAMETERS FILE
+    # NOTE that the parameters file overwrites all previously set parameters.
+    if 'PARAMETERS' in cmd_args:
+        load_params(path.join("..", "parameters", cmd_args['PARAMETERS']))
 
-        # POPULATION OPTIONS
-        elif opt == "--population":
-            check_int('POPULATION_SIZE', arg)
-        elif opt == "--generations":
-            check_int('GENERATIONS', arg)
+    # Join original params dictionary with command line specified arguments.
+    # NOTE that command line arguments overwrite all previously set parameters.
+    params.update(cmd_args)
 
-        # INDIVIDUAL SIZE
-        elif opt == "--max_tree_depth":
-            check_int('MAX_TREE_DEPTH', arg)
-        elif opt == "--codon_size":
-            check_int('CODON_SIZE', arg)
-        elif opt == "--genome_length":
-            check_int('GENOME_LENGTH', arg)
+    if params['LOAD_STATE']:
+        # Load run from state.
+        from utilities.algorithm.state import load_state
+        
+        # Load in state information.
+        individuals = load_state(params['LOAD_STATE'])
 
-        # INITIALISATION
-        elif opt == "--initialisation":
-            params['INITIALISATION'] = arg
-        elif opt == "--max_init_depth":
-            check_int('MAX_INIT_DEPTH', arg)
-        elif opt == "--genome_init":
-            params['GENOME_INIT'] = True
-            params['INITIALISATION'] = "operators.initialisation.random_init"
-
-        # SELECTION
-        elif opt == "--selection":
-            params['SELECTION'] = arg
-        elif opt == "--invalid_selection":
-            params['INVALID_SELECTION'] = arg
-        elif opt == "--tournament_size":
-            check_int('TOURNAMENT_SIZE', arg)
-        elif opt == "--selection_proportion":
-            check_float('SELECTION_PROPORTION', arg)
-
-        # EVALUATION
-        elif opt == "--multicore":
-            params['MULTIPCORE'] = True
-        elif opt == "--cores":
-            check_int('CORES', arg)
-
-        # CROSSOVER
-        elif opt == "--crossover":
-            params['CROSSOVER'] = arg
-        elif opt == "--crossover_probability":
-            check_float('CROSSOVER_PROBABILITY', arg)
-
-        # MUTATION
-        elif opt == "--mutation":
-            params['MUTATION'] = arg
-        elif opt == "--mutation_events":
-            check_int('MUTATION_EVENTS', arg)
-        elif opt == "--mutation_probability":
-            check_float('MUTATION_PROBABILITY', arg)
-
-        # REPLACEMENT
-        elif opt == "--replacement":
-            params['REPLACEMENT'] = arg
-        elif opt == "--elite_size":
-            check_int('ELITE_SIZE', arg)
-
-        # PROBLEM SPECIFICS
-        elif opt == "--bnf_grammar":
-            params['GRAMMAR_FILE'] = arg
-        elif opt == "--problem":
-            params['PROBLEM'] = arg
-        elif opt == "--problem_suite":
-            params['SUITE'] = arg
-        elif opt == "--target_string":
-            params['STRING_MATCH_TARGET'] = arg
-        elif opt == "--experiment_name":
-            params['EXPERIMENT_NAME'] = arg
-
-        # OPTIONS
-        elif opt == "--random_seed":
-            check_int('RANDOM_SEED', arg)
-        elif opt == "--debug":
-            params['DEBUG'] = True
-        elif opt == "--verbose":
-            params['VERBOSE'] = True
-        elif opt == "--silent":
-            params['SILENT'] = True
-        elif opt == "--save_all":
-            params['SAVE_ALL'] = True
-        elif opt == "--save_plots":
-            params['SAVE_PLOTS'] = True
-
-        # CACHING
-        elif opt == "--cache":
-            params['CACHE'] = True
-            params['LOOKUP_FITNESS'] = True
-        elif opt == "--dont_lookup_fitness":
-            params['LOOKUP_FITNESS'] = False
-        elif opt == "--lookup_bad_fitness":
-            params['LOOKUP_FITNESS'] = False
-            params['LOOKUP_BAD_FITNESS'] = True
-        elif opt == "--mutate_duplicates":
-            params['LOOKUP_FITNESS'] = False
-            params['MUTATE_DUPLICATES'] = True
-        elif opt == "--complete_evals":
-            params['COMPLETE_EVALS'] = True
-        else:
-            assert False, "Unhandled Option, use --help for available params"
-
-    # Elite size is set to either 1 or 1% of the population size, whichever is
-    # bigger if no elite size is previously set.
-    if params['ELITE_SIZE'] is None:
-        params['ELITE_SIZE'] = return_percent(1, params['POPULATION_SIZE'])
-
-    # Set the size of a generation
-    params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - params[
-        'ELITE_SIZE']
-
-    # Set random seed
-    if params['RANDOM_SEED'] is None:
-        params['RANDOM_SEED'] = int(time.clock()*1000000)
-    seed(params['RANDOM_SEED'])
-
-    # Set GENOME_OPERATIONS automatically for faster linear operations
-    if (params['MUTATION'] == 'operators.mutation.int_flip' or
-                params['MUTATION'] == 'int_flip') and \
-            (params['CROSSOVER'] == 'operators.crossover.onepoint' or
-                     params['CROSSOVER'] == 'onepoint'):
-        params['GENOME_OPERATIONS'] = True
+        # Set correct search loop.
+        from algorithm.search_loop import search_loop_from_state
+        params['SEARCH_LOOP'] = search_loop_from_state
+        
+        # Set population.
+        setattr(trackers, "state_individuals", individuals)
+        
     else:
-        params['GENOME_OPERATIONS'] = False
-
-    # Set problem specifics
-    params['GRAMMAR_FILE'], \
-    params['ALTERNATE'] = set_fitness_params(params['PROBLEM'], params)
-
-    # Set Grammar File
-    params['BNF_GRAMMAR'] = grammar.Grammar(params['GRAMMAR_FILE'])
+        # Elite size is set to either 1 or 1% of the population size, whichever is
+        # bigger if no elite size is previously set.
+        if params['ELITE_SIZE'] is None:
+            params['ELITE_SIZE'] = return_percent(1, params['POPULATION_SIZE'])
     
-    # Set Fitness Function
-    params['FITNESS_FUNCTION'] = set_fitness_function(params['PROBLEM'],
-                                                      params['ALTERNATE'])
-
-    # Initialise run lists and folders
-    initialise_run_params()
-
-    # Set correct param imports for specified function options
-    set_param_imports()
+        # Set the size of a generation
+        params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - params[
+            'ELITE_SIZE']
+    
+        # Set GENOME_OPERATIONS automatically for faster linear operations.
+        # TODO: there must be a cleaner way of doing this.
+        if params['MUTATION'] in ['operators.mutation.int_flip', 'int_flip'] \
+                and params['CROSSOVER'] in [
+                    'operators.crossover.fixed_onepoint',
+                    'operators.crossover.variable_onepoint',
+                    'operators.crossover.fixed_twopoint',
+                    'operators.crossover.variable_twopoint',
+                    'fixed_onepoint', 'variable_onepoint',
+                    'fixed_twopoint', 'variable_twopoint']:
+            params['GENOME_OPERATIONS'] = True
+        else:
+            params['GENOME_OPERATIONS'] = False
+            
+        # Set correct param imports for specified function options, including
+        # error metrics and fitness functions.
+        set_param_imports()
+    
+        # Clean the stats dict to remove unused stats.
+        clean_stats.clean_stats()
+    
+        # Initialise run lists and folders
+        initialise_run_params()
+    
+        # Parse grammar file and set grammar class.
+        params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
+                                                params['GRAMMAR_FILE']))

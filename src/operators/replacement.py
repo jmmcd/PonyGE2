@@ -1,5 +1,4 @@
 from algorithm.parameters import params
-from copy import copy
 
 
 def replacement(new_pop, old_pop):
@@ -35,7 +34,7 @@ def generational(new_pop, old_pop):
     # Append the best ELITE_SIZE individuals from the old population to the
     # new population.
     for ind in old_pop[:params['ELITE_SIZE']]:
-        new_pop.insert(0, copy(ind))
+        new_pop.insert(0, ind)
     
     # Return the top POPULATION_SIZE individuals of the new pop, including
     # elites.
