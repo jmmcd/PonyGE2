@@ -1,7 +1,7 @@
 import types
 from copy import copy
 from time import time
-from os import getcwd, path, mkdir
+from os import getcwd, path, makedirs
 from sys import stdout
 
 from algorithm.parameters import params
@@ -294,7 +294,7 @@ def generate_folders_and_files():
 
         if not path.isdir(path_1):
             # Create results folder.
-            mkdir(path_1)
+            makedirs(path_1)
 
         # Set file path to include experiment name.
         params['FILE_PATH'] = path.join(path_1, params['EXPERIMENT_NAME'])
@@ -305,11 +305,11 @@ def generate_folders_and_files():
 
     # Generate save folders
     if not path.isdir(params['FILE_PATH']):
-        mkdir(params['FILE_PATH'])
+        makedirs(params['FILE_PATH'])
 
     if not path.isdir(path.join(params['FILE_PATH'],
                                 str(params['TIME_STAMP']))):
-        mkdir(path.join(params['FILE_PATH'],
+        makedirs(path.join(params['FILE_PATH'],
                         str(params['TIME_STAMP'])))
 
     params['FILE_PATH'] = path.join(params['FILE_PATH'],
