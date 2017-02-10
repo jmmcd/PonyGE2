@@ -274,6 +274,12 @@ def parse_cmd_args(arguments):
                         help='Sets the error metric to be used with regression'
                              ' style problems. Requires string such as "mse" '
                              'or "rmse".')
+    parser.add_argument('--optimize_constants',
+                        dest='OPTIMIZE_CONSTANTS',
+                        type=bool,
+                        help='Whether to optimize numerical constants by '
+                             'gradient descent in supervised learning problems.'
+                             ' Requires True or False, default False.')
     parser.add_argument('--extra_fitness_parameters',
                         dest='EXTRA_FITNESS_PARAMETERS',
                         type=str,

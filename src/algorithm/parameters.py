@@ -50,6 +50,8 @@ params = {
         # "hinge"
         # "f1_score"
 
+        'OPTIMIZE_CONSTANTS': False,
+
         # Specify target for target problems
         'TARGET': "ponyge_rocks",
 
