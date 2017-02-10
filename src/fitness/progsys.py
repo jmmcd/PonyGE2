@@ -23,9 +23,7 @@ class progsys:
 
     def __init__(self):
         self.training, self.test, self.embed_header, self.embed_footer = self.get_data(params['DATASET'])
-        self.eval = subprocess.Popen(['python', 'fitness/python_script_evaluation.py'],
-                                stdout=subprocess.PIPE,
-                                stdin=subprocess.PIPE)
+        self.create_eval_process()
         if params['MULTICORE']:
             print("Warming: Multicore is not supported with progsys as fitness function.\n"
                   "Fitness function only allows sequential evaluation.")
@@ -42,9 +40,18 @@ class progsys:
 
         result = json.loads(result_json.decode())
 
+        if 'exception' in result and 'JSONDecodeError' in result['exception']:
+            self.eval.stdin.close()
+            self.create_eval_process()
+
         if 'quality' not in result:
             result['quality'] = sys.maxsize
         return result['quality']
+
+    def create_eval_process(self):
+        self.eval = subprocess.Popen(['python', 'fitness/python_script_evaluation.py'],
+                                stdout=subprocess.PIPE,
+                                stdin=subprocess.PIPE)
 
     def format_program(self, individual, header, footer):
         lastNewLine = header.rindex('\n')
