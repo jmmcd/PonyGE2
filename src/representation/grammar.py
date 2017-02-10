@@ -119,7 +119,7 @@ class Grammar(object):
                         continue
 
                     # Initialise empty data structures for production choice
-                    tmp_production, terminalparts = [], ''
+                    tmp_production, terminalparts = [], None
 
                     # special case: GERANGE:dataset_n_vars will be transformed
                     # to productions 0 | 1 | ... | n_vars-1
@@ -139,7 +139,7 @@ class Grammar(object):
 
                         for i in range(n):
                             # add a terminal symbol
-                            tmp_production, terminalparts = [], ''
+                            tmp_production, terminalparts = [], None
                             symbol = {
                                 "symbol": str(i),
                                 "type": "T",
@@ -166,7 +166,7 @@ class Grammar(object):
                         # symbols.
                         
                         if sub_p.group('subrule'):
-                            if terminalparts:
+                            if terminalparts is not None:
                                 # Terminal symbol is to be appended to the
                                 # terminals dictionary.
                                 symbol = {"symbol": terminalparts,
@@ -181,7 +181,7 @@ class Grammar(object):
                                     self.terminals[terminalparts]:
                                     self.terminals[terminalparts].append(
                                         rule.group('rulename'))
-                                terminalparts = ''
+                                terminalparts = None
                             
                             tmp_production.append(
                                 {"symbol": sub_p.group('subrule'),
@@ -189,11 +189,13 @@ class Grammar(object):
                         
                         else:
                             # Unescape special characters (\n, \t etc.)
+                            if terminalparts is None:
+                                terminalparts = ''
                             terminalparts += ''.join(
                                 [part.encode().decode('unicode-escape') for
                                  part in sub_p.groups() if part])
                     
-                    if terminalparts:
+                    if terminalparts is not None:
                         # Terminal symbol is to be appended to the terminals
                         # dictionary.
                         symbol = {"symbol": terminalparts,
@@ -373,7 +375,7 @@ class Grammar(object):
             for choice in choices:
                 # Set the maximum path to a terminal for each produciton choice
                 choice['max_path'] = max([item["min_steps"] for item in
-                                          choice['choice']])
+                                      choice['choice']])
 
             # Find shortest path to a terminal for all production choices for
             # the current NT. The shortest path will be the minimum of the
