@@ -285,7 +285,6 @@ def parse_cmd_args(arguments):
     parser.add_argument('--fitness_function',
                         dest='FITNESS_FUNCTION',
                         type=str,
-                        nargs='+',
                         help='Sets the fitness function to be used. '
                              'Requires string such as "regression". '
                              'Multiple fitness functions can be specified'
