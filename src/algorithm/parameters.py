@@ -182,7 +182,7 @@ params = {
         # Agent Size. Number of agents having their own copy of genetic material
         'AGENT_SIZE': 100,
         # Interaction Probablity. How frequently the agents can interaction with each other
-        'INTERACTION_PROBABILITY':0.5
+        'INTERACTION_PROBABILITY':0.5,
         
         # OTHER
         # Set machine name (useful for doing multiple runs)
