@@ -14,48 +14,29 @@ Ant simulator to simulate ants in Santa Fe trail environment
 """
     
 class santa_fe_trail(base_ff):
-    #Fitness function for matching a string. Takes a string and returns
-    #fitness. Penalises output that is not the same length as the target.
-    #Penalty given to individual string components which do not match ASCII
-    #value of target.
+    #Fitness function for Santa Fe Trail problem. Starts the AntSimulator
+    #with the individuals phenotype and returns the amount of food eaten. 
+    #Total food eaten is 89.
 
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        
-        # Set target string.
-        self.target = params['TARGET']
+
+        self.maximise = True
 
     def evaluate(self, ind, **kwargs):
+        # Initialise the AntSimulator with maximum of 600 steps
         ant = AntSimulator(600)
+
+        # Store the phenotype of the individual into code. The phenotype
+        # python program sniplet that can be executed by AntSimulator
         code = ind.phenotype
+
+        # Build python partial functions
         routine = ant.build_routine(code)
+
+        # Pass the partial functions to the ant simulator
         ant.run(routine)
-        #print (code,'Food eaten',ant.eaten)
-        return 90.0/(ant.eaten+1)
 
-##Parsing type
-
-#class Parameter:
-#    grammar = name()
-
-#class Parameters(Namespace):
-#    grammar = csl(Parameter)
-
-def main():
-    ant = AntSimulator(500)
-    ant.load_trail()
-    sample = 'move(); "if(food_ahead()==1) {"right(); move();"} else {" right(); "}" move(); move();'
-    sample = '''
-    if food_ahead()==1:
-        left()
-        move()
-    else:
-        right()
-        move()
-    '''
-    print (sample)
-    ant.run(sample)
-
-if __name__ == '__main__':
-    main()
+        # Return the amount of food eaten
+        return ant.eaten

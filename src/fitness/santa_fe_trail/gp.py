@@ -587,31 +587,11 @@ class AntSimulator(object):
 def main():
     ant = AntSimulator(600)
 
-    """
-    pset = PrimitiveSet("MAIN", 0)
-    pset.addPrimitive(ant.if_food_ahead, 2)
-    pset.addPrimitive(prog2, 2)
-    pset.addPrimitive(prog3, 3)
-    pset.addTerminal(ant.move)
-    pset.addTerminal(ant.left)
-    pset.addTerminal(ant.right)
-    """
-    #ant.load_trail()
-    individual = 'prog3(if_food_ahead(move_forward, move_forward), if_food_ahead(turn_left, move_forward), if_food_ahead(turn_right, move_forward))'
-    individual = 'prog3(if_food_ahead(move, move), if_food_ahead(left, move), if_food_ahead(right, move))'    
-    #individual = 'prog3(prog3(move_forward,turn_right, if_food_ahead(if_food_ahead(prog3(move_forward, move_forward, move_forward), prog2(turn_left, turn_right)), turn_left)), if_food_ahead(turn_left, turn_left), if_food_ahead(move_forward, turn_right))'
-    #individual = 'prog3(prog3(move_forward,turn_right, if_food_ahead(if_food_ahead(prog3(move_forward, move_forward, move_forward), prog3(turn_left, turn_right,move_forward)), turn_left)), if_food_ahead(turn_left, turn_left), if_food_ahead(move_forward, turn_right))'    
-    #individual = 'prog2(left,prog2(prog3(left,right,left),right))'
-
-
-    #New Samples
+    # New Samples
     individual = 'prog2(prog3(prog3(prog2(prog3(left,left,right),prog2(right,left)),prog2(prog2(right,right),prog3(move,move,left)),if_food_ahead(prog2(left,left),left)),right,if_food_ahead(prog2(prog2(right,left),move),if_food_ahead(if_food_ahead(right,left),move))),prog2(if_food_ahead(if_food_ahead(prog3(left,right,move),prog2(left,right)),move),prog3(if_food_ahead(prog2(left,move),prog2(move,left)),move,move)))'
     routine= ant.build_routine(individual)
-    #routine = compile(individual, pset)
-    #print (individual,routine)
     ant.run(routine)
     print (ant.eaten)
-    exit()
 
 if __name__ == '__main__':
     main()
