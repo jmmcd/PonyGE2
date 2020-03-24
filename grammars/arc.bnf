@@ -1,4 +1,4 @@
-<lambda> ::= lambda x, y: 
+<lambda> ::= lambda m, x, y: <color>
 <color> ::= <color_const> |
             <ite> |
             <sel_aggr>
@@ -9,7 +9,7 @@
                 rectangle(<point>, <point>) |
                 neighborhood(<point>, <digit>)
 <point_list> ::= <point> | <point>, <point_list>
-<point> ::= (<num>, <num>)
+<point> ::= (<num>+x, <num>+y)
 
 <bool> ::= <bool_const>
            <bool_exp> |
@@ -25,7 +25,7 @@
                any_hidden(<sel>) | 
                all_hidden(<sel>)
                
-<sel_aggr> ::= mode(<sel>) | 
+<sel_aggr> ::= mode(<sel>) | first(<sel>)
                
 <ite> ::= <color> if <bool> else <color>
 
