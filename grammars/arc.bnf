@@ -1,0 +1,35 @@
+<lambda> ::= lambda x, y: 
+<color> ::= <color_const> |
+            <ite> |
+            <sel_aggr>
+            
+# selections: lists of relative points
+<sel> ::= <sel_const>
+<sel_const> ::= [<point_list>] |
+                rectangle(<point>, <point>) |
+                neighborhood(<point>, <digit>)
+<point_list> ::= <point> | <point>, <point_list>
+<point> ::= (<num>, <num>)
+
+<bool> ::= <bool_const>
+           <bool_exp> |
+           all([<bool_list>]) |
+           any([<bool_list>]) |
+           (not <bool>)
+<bool_list> ::= <bool> | <bool>, <bool_list>
+           
+<bool_const> ::= True | False
+<bool_exp> ::= contains(<sel>, <color>) |
+               (<color> == <color>) |
+               selection_equals(<sel>, <sel>) |
+               any_hidden(<sel>) | 
+               all_hidden(<sel>)
+               
+<sel_aggr> ::= mode(<sel>) | 
+               
+<ite> ::= <color> if <bool> else <color>
+
+# one-digit numbers
+<num> ::= 0 | <digit> | -<digit>
+<digit> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<color_const> ::= None | 0 | <digit>
