@@ -36,8 +36,8 @@ class arc_evaluate(base_ff):
         # self.target = params['TARGET']
 
     def evaluate(self, ind, **kwargs):
-        guess = ind.phenotype
-        f = eval(guess)
+        lambda_exp = 'lambda m, x, y: ' + ind.phenotype
+        f = eval(lambda_exp)
         g = lambda x: apply(x, f)
 
         inputs = []
