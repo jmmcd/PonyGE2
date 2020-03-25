@@ -41,13 +41,7 @@ def selection_equals(m, sel1, sel2):
     return colors1 == colors2
 
 def any_hidden(m, sel):
-    for x, y in sel:
-        if m[x, y] is None:
-            return True
-    return False
+    return len(get(m, sel)) < len(sel)
 
 def all_hidden(m, sel):
-    for x, y in sel:
-        if m[x, y] is not None:
-            return False
-    return True
+    return len(get(m, sel)) == 0
