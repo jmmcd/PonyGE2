@@ -1,17 +1,16 @@
-<lambda> ::= lambda m, x, y: <color>
 <color> ::= <color_const> |
-            <ite> |
-            <sel_aggr>
+            <color> if <bool> else <color> |
+            mode(m, <sel>) |
+            first(m, <sel>)
             
 # selections: lists of relative points
-<sel> ::= <sel_const>
-<sel_const> ::= [<point_list>] |
-                rectangle(<point>, <point>) |
-                neighborhood(<point>, <digit>)
+<sel> ::= [<point_list>] |
+          rectangle(<point>, <point>) |
+          neighborhood(<point>, <digit>)
 <point_list> ::= <point> | <point>, <point_list>
 <point> ::= (<num>+x, <num>+y)
 
-<bool> ::= <bool_const>
+<bool> ::= <bool_const> |
            <bool_exp> |
            all([<bool_list>]) |
            any([<bool_list>]) |
@@ -19,16 +18,12 @@
 <bool_list> ::= <bool> | <bool>, <bool_list>
            
 <bool_const> ::= True | False
-<bool_exp> ::= contains(<sel>, <color>) |
+<bool_exp> ::= contains(m, <sel>, <color>) |
                (<color> == <color>) |
-               selection_equals(<sel>, <sel>) |
-               any_hidden(<sel>) | 
-               all_hidden(<sel>)
+               selection_equals(m, <sel>, <sel>) |
+               any_hidden(m, <sel>) | 
+               all_hidden(m, <sel>)
                
-<sel_aggr> ::= mode(<sel>) | first(<sel>)
-               
-<ite> ::= <color> if <bool> else <color>
-
 # one-digit numbers
 <num> ::= 0 | <digit> | -<digit>
 <digit> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
