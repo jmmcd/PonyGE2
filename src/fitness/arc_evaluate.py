@@ -34,8 +34,7 @@ class arc_evaluate(base_ff):
         self.x_train, self.y_train, self.x_test, self.y_test = get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
         self.x_train = self.x_train.T
        
-        # Set target string.
-        # self.target = params['TARGET']
+        self.maximise = True
 
     def evaluate(self, ind, **kwargs):
         lambda_exp = 'lambda m, x, y: ' + ind.phenotype
@@ -57,5 +56,4 @@ class arc_evaluate(base_ff):
             pred = g(x)
             total_accuracy += accuracy(pred, y) 
 
-        print(total_accuracy / float(len(inputs)))
         return total_accuracy / float(len(inputs))
