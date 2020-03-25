@@ -40,6 +40,9 @@ def selection_equals(m, sel1, sel2):
     colors2 = [ m[x, y] for x, y in sel2 ] 
     return colors1 == colors2
 
+def contains(m, sel, col):
+    return col in get_sel(m, sel)
+
 def any_hidden(m, sel):
     for x, y in sel:
         if m[x, y] is None:
