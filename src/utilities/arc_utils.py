@@ -1,15 +1,26 @@
 import numpy as np
 
+def get(m, point):
+    sizex, sizey = m.shape
+    x, y = point
+    if (0 <= x < sizex) and (0 <= y < sizey):
+        return int(m[x, y])
+    else:
+        return None
+
+def get_sel(m, sel):
+    sizex, sizey = m.shape
+    cropped_sel = [ (x, y) for x, y in sel if (0 <= x < sizex) and (0 <= y < sizey) ]
+    return [ int(m[x, y]) for x, y in cropped_sel ]
+
 def mode(m, sel):
     color_dist = np.zeros(10)
-    for x, y in sel:
-        color = int(m[x, y])
-        if color is not None:
-            color_dist[color] += 1
+    for col in get_sel(m, sel):
+        color_dist[col] += 1
     return np.argmax(color_dist)
 
 def first(m, sel):
-    return int(m[sel[0][0], sel[0][1]])
+    return get(m, sel[0])
 
 def rectangle(point1, point2):
     x1, y1 = point1
