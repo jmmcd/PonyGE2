@@ -3,13 +3,13 @@ import numpy as np
 def mode(m, sel):
     color_dist = np.zeros(10)
     for x, y in sel:
-        color = m[x, y]
+        color = int(m[x, y])
         if color is not None:
             color_dist[color] += 1
     return np.argmax(color_dist)
 
 def first(m, sel):
-    return m[sel[0][0], sel[0][1]]
+    return int(m[sel[0][0], sel[0][1]])
 
 def rectangle(point1, point2):
     x1, y1 = point1

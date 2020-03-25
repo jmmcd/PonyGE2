@@ -5,6 +5,8 @@ from utilities.fitness.get_data import get_data
 from numpy.random import normal
 import numpy as np
 
+from utilities.arc_utils import *
+
 def apply(x, f):
     result = np.zeros((x.shape[1], x.shape[0]))
 
