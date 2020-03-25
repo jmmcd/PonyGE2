@@ -36,15 +36,15 @@ def neighborhood(point, radius):
                          for dy in range(y-radius, y+radius+1)]
 
 def selection_equals(m, sel1, sel2):
-    colors1 = [ m[x, y] for x, y in sel1 ]
-    colors2 = [ m[x, y] for x, y in sel2 ] 
+    colors1 = [ get(m, point) for point in sel1 ]
+    colors2 = [ get(m, point) for point in sel2 ] 
     return colors1 == colors2
 
 def contains(m, sel, col):
     return col in get_sel(m, sel)
 
 def any_hidden(m, sel):
-    return len(get(m, sel)) < len(sel)
+    return len(get_sel(m, sel)) < len(sel)
 
 def all_hidden(m, sel):
-    return len(get(m, sel)) == 0
+    return len(get_sel(m, sel)) == 0
