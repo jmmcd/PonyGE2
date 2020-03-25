@@ -66,7 +66,7 @@ def get_stats(individuals, end=False):
 
     else:
         # Single objective optimisation is being used.
-        get_soo_stats(individuals, end)
+        return get_soo_stats(individuals, end)
 
     if params['SAVE_STATE'] and not params['DEBUG'] and \
                             stats['gen'] % params['SAVE_STATE_STEP'] == 0:
@@ -96,6 +96,7 @@ def get_soo_stats(individuals, end):
     if end or params['VERBOSE'] or not params['DEBUG']:
         # Update all stats.
         update_stats(individuals, end)
+
 
     # Save fitness plot information
     if params['SAVE_PLOTS'] and not params['DEBUG']:
@@ -149,6 +150,8 @@ def get_soo_stats(individuals, end):
     if end and not params['SILENT']:
         print_final_stats()
 
+    if end:
+        return trackers.best_ever.phenotype, trackers.best_ever.fitness
 
 def get_moo_stats(individuals, end):
     """

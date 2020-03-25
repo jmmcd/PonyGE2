@@ -23,7 +23,7 @@ def mane():
     individuals = params['SEARCH_LOOP']()
 
     # Print final review
-    get_stats(individuals, end=True)
+    return get_stats(individuals, end=True)
 
 
 if __name__ == "__main__":
