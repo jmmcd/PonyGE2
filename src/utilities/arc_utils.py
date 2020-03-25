@@ -44,13 +44,7 @@ def contains(m, sel, col):
     return col in get_sel(m, sel)
 
 def any_hidden(m, sel):
-    for x, y in sel:
-        if m[x, y] is None:
-            return True
-    return False
+    return len(get(m, sel)) < len(sel)
 
 def all_hidden(m, sel):
-    for x, y in sel:
-        if m[x, y] is not None:
-            return False
-    return True
+    return len(get(m, sel)) == 0
