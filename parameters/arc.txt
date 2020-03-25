@@ -20,3 +20,4 @@ TOURNAMENT_SIZE: 2
 VERBOSE: False
 SEARCH_LOOP: search_loop
 STEP: step
+DATASET_TRAIN: arc/052/Train.txt
