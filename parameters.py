@@ -11,8 +11,8 @@ params = {
         'STEP': 'algorithm.step',
 
         # Evolutionary Parameters
-        'POPULATION_SIZE': 500,
-        'GENERATIONS': 50,
+        'POPULATION_SIZE': 10,
+        'GENERATIONS': 500,
         'HILL_CLIMBING_HISTORY': 1000,
         'SCHC_COUNT_METHOD': "count_all",
 
@@ -23,15 +23,15 @@ params = {
         'RUNS': 1,
 
         # Class of problem
-        'FITNESS_FUNCTION': "supervised_learning.regression",
+        'FITNESS_FUNCTION': "arc_evaluate",
 
         # Select problem dataset
-        'DATASET_TRAIN': "Vladislavleva4/Train.txt",
-        'DATASET_TEST': None,
+        'DATASET_TRAIN': "../../training/25ff71a9.json",
+        'DATASET_TEST': "../../test/25ff71a9.json",
         'DATASET_DELIMITER': None,
 
         # Set grammar file
-        'GRAMMAR_FILE': "supervised_learning/Vladislavleva4.bnf",
+        'GRAMMAR_FILE': "grammars/arc.bnf",
 
         # Set the number of depths permutations are calculated for
         # (starting from the minimum path of the grammar).
@@ -48,20 +48,20 @@ params = {
         'TARGET': "ponyge_rocks",
 
         # Set max sizes of individuals
-        'MAX_TREE_DEPTH': 90,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
+        'MAX_TREE_DEPTH': 30,  # SET TO 90 DUE TO PYTHON EVAL() STACK LIMIT.
                                # INCREASE AT YOUR OWN RISK.
         'MAX_TREE_NODES': None,
-        'CODON_SIZE': 100000,
-        'MAX_GENOME_LENGTH': None,
+        'CODON_SIZE': 1000,
+        'MAX_GENOME_LENGTH': 500,
         'MAX_WRAPS': 0,
 
         # INITIALISATION
         # Set initialisation operator.
-        'INITIALISATION': "operators.PI_grow",
+        'INITIALISATION': "operators.uniform_tree",
         # Set the maximum geneome length for initialisation.
         'INIT_GENOME_LENGTH': 200,
         # Set the maximum tree depth for initialisation.
-        'MAX_INIT_TREE_DEPTH': 10,
+        'MAX_INIT_TREE_DEPTH': 5,
         # Set the minimum tree depth for initialisation.
         'MIN_INIT_TREE_DEPTH': None,
 
@@ -84,7 +84,7 @@ params = {
         # Set crossover operator.
         'CROSSOVER': "operators.variable_onepoint",
         # Set crossover probability.
-        'CROSSOVER_PROBABILITY': 0.75,
+        'CROSSOVER_PROBABILITY': 0.5,
         # Prevents crossover from generating invalids.
         'NO_CROSSOVER_INVALIDS': False,
 
@@ -93,7 +93,7 @@ params = {
         'MUTATION': "operators.int_flip_per_codon",
         # Set mutation probability (None defaults to 1 over the length of
         # the genome for each codon)
-        'MUTATION_PROBABILITY': None,
+        'MUTATION_PROBABILITY': 0.25,
         # Set number of mutation events
         'MUTATION_EVENTS': 1,
         # Prevents mutation from generating invalids.
@@ -123,11 +123,11 @@ params = {
         'SAVE_ALL': False,
         # Save a plot of the evolution of the best fitness result for each
         # generation.
-        'SAVE_PLOTS': True,
+        'SAVE_PLOTS': False,
 
         # MULTIPROCESSING
         # Multi-core parallel processing of phenotype evaluations.
-        'MULTICORE': False,
+        'MULTICORE': True,
         # Set the number of cpus to be used for multiprocessing
         'CORES': cpu_count(),
 
@@ -162,7 +162,7 @@ params = {
         # string of each phenotype in a big list of all phenotypes. Saves all
         # fitness information on each individual. Gives you an idea of how much
         # repetition is in standard GE/GP.
-        'CACHE': False,
+        'CACHE': True,
         # Uses the cache to look up the fitness of duplicate individuals. CACHE
         # must be set to True if you want to use this.
         'LOOKUP_FITNESS': False,
