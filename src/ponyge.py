@@ -9,9 +9,6 @@
 
 from stats import get_stats
 from parameters import params
-from utilities import set_params
-import sys
-
 
 def mane():
     """ Run program """
@@ -21,8 +18,3 @@ def mane():
 
     # Print final review
     return get_stats(individuals, end=True)
-
-
-if __name__ == "__main__":
-    set_params(sys.argv[1:])  # exclude the ponyge.py arg itself
-    mane()
