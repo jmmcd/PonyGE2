@@ -24,7 +24,8 @@ def solve_task(task_nr):
         "--max_init_tree_depth", "5", 
         "--max_tree_depth", "30", 
         "--mutation_probability", "0.25", 
-        "--population_size", "10", 
+        "--population_size", "10",
+        "--multicore",
         "--fitness_function", "arc_evaluate", 
         "--dataset_train", "arc/{}/Train.txt".format(pad(task_nr))
     ]
@@ -36,3 +37,5 @@ def solve_task(task_nr):
     g = lambda x: apply(x, eval(individual))
 
     return g, individual, fitness
+
+print(solve_task(52))

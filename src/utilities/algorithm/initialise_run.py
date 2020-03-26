@@ -7,7 +7,6 @@ from time import time
 
 from algorithm.parameters import params
 from utilities.stats import trackers
-from utilities.stats.file_io import generate_folders_and_files
 
 
 def initialise_run_params(create_files):
@@ -36,15 +35,6 @@ def initialise_run_params(create_files):
                                      str(start.microsecond),
                                      str(getpid()),
                                      str(params['RANDOM_SEED'])])
-    if not params['SILENT']:
-        print("\nStart:\t", start, "\n")
-
-    # Generate save folders and files
-    if params['DEBUG']:
-        print("Seed:\t", params['RANDOM_SEED'], "\n")
-    elif create_files:
-        generate_folders_and_files()
-
 
 def set_param_imports():
     """

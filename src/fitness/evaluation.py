@@ -43,37 +43,7 @@ def evaluate_fitness(individuals):
             stats['invalids'] += 1
 
         else:
-            eval_ind = True
-
-            # Valid individuals can be evaluated.
-            if params['CACHE'] and ind.phenotype in cache:
-                # The individual has been encountered before in
-                # the utilities.trackers.cache.
-
-                if params['LOOKUP_FITNESS']:
-                    # Set the fitness as the previous fitness from the
-                    # cache.
-                    ind.fitness = cache[ind.phenotype]
-                    eval_ind = False
-
-                elif params['LOOKUP_BAD_FITNESS']:
-                    # Give the individual a bad default fitness.
-                    ind.fitness = params['FITNESS_FUNCTION'].default_fitness
-                    eval_ind = False
-
-                elif params['MUTATE_DUPLICATES']:
-                    # Mutate the individual to produce a new phenotype
-                    # which has not been encountered yet.
-                    while (not ind.phenotype) or ind.phenotype in cache:
-                        ind = params['MUTATION'](ind)
-                        stats['regens'] += 1
-                    
-                    # Need to overwrite the current individual in the pop.
-                    individuals[name] = ind
-                    ind.name = name
-
-            if eval_ind:
-                results = eval_or_append(ind, results, pool)
+            results = eval_or_append(ind, results, pool)
 
     if params['MULTICORE']:
         for result in results:

@@ -3,7 +3,6 @@ from random import randint, random, choice
 from algorithm.parameters import params
 from representation import individual
 from representation.derivation import generate_tree
-from representation.latent_tree import latent_tree_mutate, latent_tree_repair
 from utilities.representation.check_methods import check_ind
 
 
@@ -91,34 +90,6 @@ def int_flip_per_codon(ind):
     for i in range(eff_length):
         if random() < p_mut:
             ind.genome[i] = randint(0, params['CODON_SIZE'])
-
-    # Re-build a new individual with the newly mutated genetic information.
-    new_ind = individual.Individual(ind.genome, None)
-
-    return new_ind
-
-
-def int_flip_per_ind(ind):
-    """
-    Mutate the genome of an individual by randomly choosing a new int with
-    probability p_mut. Works per-individual. Mutation is performed over the
-    entire length of the genome by default, but the flag within_used is
-    provided to limit mutation to only the effective length of the genome.
-
-    :param ind: An individual to be mutated.
-    :return: A mutated individual.
-    """
-
-    # Set effective genome length over which mutation will be performed.
-    eff_length = get_effective_length(ind)
-
-    if not eff_length:
-        # Linear mutation cannot be performed on this individual.
-        return ind
-
-    for _ in range(params['MUTATION_EVENTS']):
-        idx = randint(0, eff_length-1)
-        ind.genome[idx] = randint(0, params['CODON_SIZE'])
 
     # Re-build a new individual with the newly mutated genetic information.
     new_ind = individual.Individual(ind.genome, None)
@@ -214,32 +185,6 @@ def get_effective_length(ind):
     return eff_length
 
 
-def LTGE_mutation(ind):
-    """Mutation in the LTGE representation."""
-    
-    # mutate and repair.
-    g, ph = latent_tree_repair(latent_tree_mutate(ind.genome), 
-                               params['BNF_GRAMMAR'], params['MAX_TREE_DEPTH'])
 
-    # wrap up in an Individual and fix up various Individual attributes
-    ind = individual.Individual(g, None, False)
-
-    ind.phenotype = ph
-    
-    # number of nodes is the number of decisions in the genome
-    ind.nodes = ind.used_codons = len(g)
-
-    # each key is the length of a path from root
-    ind.depth = max(len(k) for k in g)
-
-    # in LTGE there are no invalid individuals
-    ind.invalid = False
-    
-    return ind
-
-
-# Set attributes for all operators to define linear or subtree representations.
 int_flip_per_codon.representation = "linear"
-int_flip_per_ind.representation = "linear"
 subtree.representation = "subtree"
-LTGE_mutation.representation = "latent tree"

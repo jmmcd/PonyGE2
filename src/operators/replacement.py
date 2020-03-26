@@ -1,10 +1,7 @@
 from fitness.evaluation import evaluate_fitness
 from algorithm.parameters import params
-from operators.mutation import mutation
 from operators.crossover import crossover_inds
 from operators.selection import selection
-from utilities.algorithm.NSGA2 import compute_pareto_metrics
-
 
 def replacement(new_pop, old_pop):
     """
@@ -102,55 +99,3 @@ def steady_state(individuals):
     # Return the combined population.
     return total_pop
 
-
-def nsga2_replacement(new_pop, old_pop):
-    """
-    Replaces the old population with the new population using NSGA-II
-    replacement. Both new and old populations are combined, pareto fronts
-    and crowding distance are calculated, and the replacement population is
-    computed based on crowding distance per pareto front.
-    
-    :param new_pop: The new population (e.g. after selection, variation, &
-                    evaluation).
-    :param old_pop: The previous generation population.
-    :return: The 'POPULATION_SIZE' new population.
-    """
-
-    # Combine both populations (R_t = P_t union Q_t)
-    new_pop.extend(old_pop)
-
-    # Compute the pareto fronts and crowding distance
-    pareto = compute_pareto_metrics(new_pop)
-
-    # Size of the new population
-    pop_size = params['POPULATION_SIZE']
-
-    # New population to replace the last one
-    temp_pop, i = [], 0
-
-    while len(temp_pop) < pop_size:
-        # Populate the replacement population
-        
-        if len(pareto.fronts[i]) <= pop_size - len(temp_pop):
-            temp_pop.extend(pareto.fronts[i])
-        
-        else:
-            # Sort the current pareto front with respect to crowding distance.
-            pareto.fronts[i] = sorted(pareto.fronts[i],
-                                      key=lambda item:
-                                      pareto.crowding_distance[item])
-        
-            # Get number of individuals to add in temp to achieve the pop_size
-            diff_size = pop_size - len(temp_pop)
-            
-            # Extend the replacement population
-            temp_pop.extend(pareto.fronts[i][:diff_size])
-    
-        # Increment counter.
-        i += 1
-    
-    return temp_pop
-
-
-# Set attributes for all operators to define multi-objective operators.
-nsga2_replacement.multi_objective = True

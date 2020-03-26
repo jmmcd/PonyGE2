@@ -1,3 +1,5 @@
+# TODO: Mit besserem data loader sollte das hier obsolet werden
+
 from os import path
 
 import numpy as np

@@ -7,10 +7,6 @@
 # Hereby licensed under the GNU GPL v3.
 """ Python GE implementation """
 
-from utilities.algorithm.general import check_python_version
-
-check_python_version()
-
 from stats.stats import get_stats
 from algorithm.parameters import params, set_params
 import sys
