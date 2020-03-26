@@ -2,10 +2,30 @@ from parameters import params
 from fitness import base_ff
 from data import arc_from_json
 
-from numpy.random import normal
+
+import itertools
 import numpy as np
 
 from arc_utils import *
+
+
+def matrix_dist(x, y):
+    mx, nx = x.shape
+    my, ny = y.shape
+    pad_x = (max(0, my-mx), max(0, ny-nx))
+    pad_y = (max(0, mx-my), max(0, nx-ny))
+    
+    norms = np.zeros((np.abs(mx-my)+1, np.abs(nx-ny)+1))
+    for x_bottom, x_right in itertools.product(range(pad_x[0]+1), range(pad_x[1]+1)):
+        for y_bottom, y_right in itertools.product(range(pad_y[0]+1), range(pad_y[1]+1)):
+            x_ = np.pad(x, ((pad_x[0]-x_bottom, x_bottom), (pad_x[1]-x_right, x_right)))
+            y_ = np.pad(y, ((pad_y[0]-y_bottom, y_bottom), (pad_y[1]-y_right, y_right)))
+            print((x_bottom,x_right), (y_bottom,y_right))
+            print(x_, y_)
+            norms[max(x_bottom, y_bottom), max(x_right, y_right)] = np.linalg.norm(x_-y_, 'fro')
+    
+    return np.min(norms)
+            
 
 def apply(x, f):
     result = np.zeros((x.shape[1], x.shape[0]))
@@ -31,14 +51,17 @@ class arc_evaluate(base_ff):
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        self.x_train, self.y_train, self.x_test, self.y_test = arc_from_json(params['DATASET_TRAIN'])
-       
-        self.maximise = True
+        self.x_train,
+            self.y_train,
+            self.x_test,
+            self.y_test = arc_from_json(params['DATASET_TRAIN'])
+        
+        self.maximise = False
 
     def evaluate(self, ind, **kwargs):
         lambda_exp = 'lambda m, x, y: ' + ind.phenotype
         f = eval(lambda_exp)
         g = lambda x: apply(x, f)
 
-        total_accuracy = sum(accuracy(g(x), y) for x, y in zip(self.x_train, self.y_train))
+        total_accuracy = sum(matrix_dist(g(x), y) for x, y in zip(self.x_train, self.y_train))
         return total_accuracy / float(len(self.x_train))
