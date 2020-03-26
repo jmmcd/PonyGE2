@@ -1,8 +1,8 @@
 import numpy as np
 
-from parameters import params
-from stats import stats
-from trackers import cache, runtime_error_cache
+from PonyGE2.parameters import params
+from PonyGE2.stats import stats
+from PonyGE2.trackers import cache, runtime_error_cache
 
 np.seterr(all="raise")
 

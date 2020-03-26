@@ -1,4 +1,4 @@
-from parameters import params
+from PonyGE2.parameters import params
 from collections import deque
 import numpy as np
 

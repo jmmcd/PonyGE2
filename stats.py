@@ -3,8 +3,8 @@ from sys import stdout
 from time import time
 import numpy as np
 
-from parameters import params
-import trackers
+from PonyGE2.parameters import params
+import PonyGE2.trackers as trackers
 
 
 """Algorithm statistics"""

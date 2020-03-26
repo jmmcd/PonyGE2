@@ -2,15 +2,15 @@ from collections import deque
 from os import path
 
 import numpy as np
-
-from representation import Tree
-from parameters import params
-from fitness import evaluate_fitness
-from operators import crossover, mutation, replacement, steady_state, selection, initialisation
-from stats import stats, get_stats
 from multiprocessing import Pool
-from python_filter import python_filter
-from utilities import pool_init
+
+from PonyGE2.representation import Tree
+from PonyGE2.parameters import params
+from PonyGE2.fitness import evaluate_fitness
+from PonyGE2.operators import crossover, mutation, replacement, steady_state, selection, initialisation
+from PonyGE2.stats import stats, get_stats
+from PonyGE2.python_filter import python_filter
+from PonyGE2.utilities import pool_init
 
 """
 step.py

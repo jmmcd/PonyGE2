@@ -7,17 +7,16 @@ from math import ceil
 from operator import attrgetter
 from os import getpid, path
 from platform import system
-
-from parameters import params
-from representation import Grammar
-from operators import load_population
 from random import seed
-from datetime import datetime
 from socket import gethostname
 from time import time
-from os import getpid, path
-import trackers
-from arc_evaluate import arc_evaluate
+
+from PonyGE2.parameters import params
+from PonyGE2.arc_evaluate import arc_evaluate
+from PonyGE2.operators import load_population
+from PonyGE2.representation import Grammar
+import PonyGE2.trackers as trackers
+
 
 """
 math_functions.py

@@ -7,8 +7,8 @@
 # Hereby licensed under the GNU GPL v3.
 """ Python GE implementation """
 
-from stats import get_stats
-from parameters import params
+from PonyGE2.stats import get_stats
+from PonyGE2.parameters import params
 
 def mane():
     """ Run program """
@@ -16,5 +16,8 @@ def mane():
     # Run evolution
     individuals = params['SEARCH_LOOP']()
 
+    best = max(individuals)
+    return best.phenotype, best.fitness
+
     # Print final review
-    return get_stats(individuals, end=True)
+    # get_stats(individuals, end=True)

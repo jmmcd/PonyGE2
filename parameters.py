@@ -7,8 +7,8 @@ machine_name = hostname[0]
 
 params = {
         # Set default step and search loop functions
-        'SEARCH_LOOP': 'algorithm.search_loop',
-        'STEP': 'algorithm.step',
+        'SEARCH_LOOP': 'PonyGE2.algorithm.search_loop',
+        'STEP': 'PonyGE2.algorithm.step',
 
         # Evolutionary Parameters
         'POPULATION_SIZE': 10,
@@ -31,7 +31,7 @@ params = {
         'DATASET_DELIMITER': None,
 
         # Set grammar file
-        'GRAMMAR_FILE': "grammars/arc.bnf",
+        'GRAMMAR_FILE': "PonyGE2/grammars/arc.bnf",
 
         # Set the number of depths permutations are calculated for
         # (starting from the minimum path of the grammar).
@@ -57,7 +57,7 @@ params = {
 
         # INITIALISATION
         # Set initialisation operator.
-        'INITIALISATION': "operators.uniform_tree",
+        'INITIALISATION': "PonyGE2.operators.uniform_tree",
         # Set the maximum geneome length for initialisation.
         'INIT_GENOME_LENGTH': 200,
         # Set the maximum tree depth for initialisation.
@@ -67,7 +67,7 @@ params = {
 
         # SELECTION
         # Set selection operator.
-        'SELECTION': "operators.tournament",
+        'SELECTION': "PonyGE2.operators.tournament",
         # For tournament selection
         'TOURNAMENT_SIZE': 2,
         # For truncation selection
@@ -82,7 +82,7 @@ params = {
 
         # CROSSOVER
         # Set crossover operator.
-        'CROSSOVER': "operators.variable_onepoint",
+        'CROSSOVER': "PonyGE2.operators.variable_onepoint",
         # Set crossover probability.
         'CROSSOVER_PROBABILITY': 0.5,
         # Prevents crossover from generating invalids.
@@ -90,7 +90,7 @@ params = {
 
         # MUTATION
         # Set mutation operator.
-        'MUTATION': "operators.int_flip_per_codon",
+        'MUTATION': "PonyGE2.operators.int_flip_per_codon",
         # Set mutation probability (None defaults to 1 over the length of
         # the genome for each codon)
         'MUTATION_PROBABILITY': 0.25,
@@ -101,7 +101,7 @@ params = {
 
         # REPLACEMENT
         # Set replacement operator.
-        'REPLACEMENT': "operators.generational",
+        'REPLACEMENT': "PonyGE2.operators.generational",
         # Set elite size.
         'ELITE_SIZE': None,
 

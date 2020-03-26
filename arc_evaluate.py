@@ -1,11 +1,11 @@
-from parameters import params
-from fitness import base_ff
-from data import arc_from_json
+from PonyGE2.parameters import params
+from PonyGE2.fitness import base_ff
+from PonyGE2.data import arc_from_json
 
 from numpy.random import normal
 import numpy as np
 
-from arc_utils import *
+from PonyGE2.arc_utils import *
 
 def apply(x, f):
     result = np.zeros((x.shape[1], x.shape[0]))

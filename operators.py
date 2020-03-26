@@ -2,12 +2,12 @@ from math import floor
 from os import getcwd, listdir, path
 from random import choice, randint, random, sample, shuffle
 
-from parameters import params
-from fitness import evaluate_fitness
-from representation import generate_tree
-from representation import Individual
-from representation import Tree
-from python_filter import python_filter
+from PonyGE2.parameters import params
+from PonyGE2.fitness import evaluate_fitness
+from PonyGE2.representation import generate_tree
+from PonyGE2.representation import Individual
+from PonyGE2.representation import Tree
+from PonyGE2.python_filter import python_filter
 
 
 """

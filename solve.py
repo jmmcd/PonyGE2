@@ -1,10 +1,13 @@
-from utilities import init_params
-from ponyge import mane
-from arc_evaluate import apply
 import numpy as np
-from parameters import params
 from os import listdir
 from os.path import join
+
+from PonyGE2.utilities import init_params
+from PonyGE2.ponyge import mane
+from PonyGE2.arc_evaluate import apply
+from PonyGE2.parameters import params
+
+import os
 
 def pad(x):
     s = str(x)
@@ -15,9 +18,9 @@ def pad(x):
 
     return s
 
-training_path = "../training/"
-evaluation_path = "../evaluation/"
-test_path = "../test/"
+training_path = "training/"
+evaluation_path = "evaluation/"
+test_path = "test/"
 
 training_tasks = sorted(listdir(training_path))
 evaluation_tasks = sorted(listdir(evaluation_path))
@@ -45,4 +48,4 @@ def solve_training_task(task_nr):
 
     return __solve()
 
-print(solve_training_task(52))
+#print(solve_training_task(52))

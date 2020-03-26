@@ -5,8 +5,8 @@ from sys import maxsize
 
 import numpy as np
 
-from parameters import params
-from mapper import mapper, map_ind_from_genome
+from PonyGE2.parameters import params
+from PonyGE2.mapper import mapper, map_ind_from_genome
 
 """
 derivation.py
@@ -421,11 +421,6 @@ class Grammar(object):
                         "choices": tmp_productions,
                         "no_choices": len(tmp_productions)}
 
-                    if len(tmp_productions) == 1:
-                        # Unit productions.
-                        print("Warning: Grammar contains unit production "
-                              "for production rule", rule.group('rulename'))
-                        print("         Unit productions consume GE codons.")
                 else:
                     # Conflicting rules with the same name.
                     raise ValueError("lhs should be unique",
