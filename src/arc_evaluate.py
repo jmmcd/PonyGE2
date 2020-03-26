@@ -1,6 +1,6 @@
 from parameters import params
 from fitness import base_ff
-from data import get_data
+from data import arc_from_json
 
 from numpy.random import normal
 import numpy as np
@@ -31,8 +31,7 @@ class arc_evaluate(base_ff):
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        self.x_train, self.y_train, self.x_test, self.y_test = get_data(params['DATASET_TRAIN'], params['DATASET_TEST'])
-        self.x_train = self.x_train.T
+        self.x_train, self.y_train, self.x_test, self.y_test = arc_from_json(params['DATASET_TRAIN'])
        
         self.maximise = True
 
@@ -41,19 +40,5 @@ class arc_evaluate(base_ff):
         f = eval(lambda_exp)
         g = lambda x: apply(x, f)
 
-        inputs = []
-        outputs = []
-        for dp in self.x_train:
-            x_len = int(dp[0] * dp[1])
-            y_len = int(dp[2] * dp[3])
-            reshaped_x = np.array(dp[4:(4 + x_len)]).reshape(int(dp[0]), int(dp[1]))
-            reshaped_y = np.array(dp[(4 + y_len):]).reshape(int(dp[2]), int(dp[3]))
-            inputs.append(reshaped_x)
-            outputs.append(reshaped_y)
-
-        total_accuracy = 0
-        for x, y in zip(inputs, outputs):
-            pred = g(x)
-            total_accuracy += accuracy(pred, y) 
-
-        return total_accuracy / float(len(inputs))
+        total_accuracy = sum(accuracy(g(x), y) for x, y in zip(self.x_train, self.y_train))
+        return total_accuracy / float(len(self.x_train))

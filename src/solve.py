@@ -27,7 +27,8 @@ def solve_task(task_nr):
         "--population_size", "10",
         "--multicore",
         "--fitness_function", "arc_evaluate", 
-        "--dataset_train", "arc/{}/Train.txt".format(pad(task_nr))
+        "--dataset_train", "../../training/25ff71a9.json",
+        "--dataset_test", "../../test/25ff71a9.json",
     ]
 
     set_params(parameters)
