@@ -1,9 +1,192 @@
 from math import floor
-from re import match, finditer, DOTALL, MULTILINE
+from random import choice, randint, randrange
+from re import DOTALL, MULTILINE, finditer, match
 from sys import maxsize
 
-from algorithm.parameters import params
+import numpy as np
 
+from parameters import params
+from mapper import mapper, map_ind_from_genome
+
+"""
+derivation.py
+"""
+
+def generate_tree(tree, genome, output, method, nodes, depth, max_depth,
+                  depth_limit):
+    """
+    Recursive function to derive a tree using a given method.
+    
+    :param tree: An instance of the Tree class.
+    :param genome: The list of all codons in a tree.
+    :param output: The list of all terminal nodes in a subtree. This is
+    joined to become the phenotype.
+    :param method: A string of the desired tree derivation method,
+    e.g. "full" or "random".
+    :param nodes: The total number of nodes in the tree.
+    :param depth: The depth of the current node.
+    :param max_depth: The maximum depth of any node in the tree.
+    :param depth_limit: The maximum depth the tree can expand to.
+    :return: genome, output, nodes, depth, max_depth.
+    """
+        
+    # Increment nodes and depth, set depth of current node.
+    nodes += 1
+    depth += 1
+    tree.depth = depth
+
+    # Find the productions possible from the current root.
+    productions = params['BNF_GRAMMAR'].rules[tree.root]
+
+    if depth_limit:
+        # Set remaining depth.
+        remaining_depth = depth_limit - depth
+    
+    else:
+        remaining_depth = depth_limit
+    
+    # Find which productions can be used based on the derivation method.
+    available = legal_productions(method, remaining_depth, tree.root,
+                                  productions['choices'])
+    
+    # Randomly pick a production choice.
+    chosen_prod = choice(available)
+
+    # Find the index of the chosen production and set a matching codon based
+    # on that index.
+    prod_index = productions['choices'].index(chosen_prod)
+    codon = randrange(productions['no_choices'],
+                      params['BNF_GRAMMAR'].codon_size,
+                      productions['no_choices']) + prod_index
+    
+    # Set the codon for the current node and append codon to the genome.
+    tree.codon = codon
+    genome.append(codon)
+    
+    # Initialise empty list of children for current node.
+    tree.children = []
+
+    for symbol in chosen_prod['choice']:
+        # Iterate over all symbols in the chosen production.
+        if symbol["type"] == "T":
+            # The symbol is a terminal. Append new node to children.
+            tree.children.append(Tree(symbol["symbol"], tree))
+            
+            # Append the terminal to the output list.
+            output.append(symbol["symbol"])
+        
+        elif symbol["type"] == "NT":
+            # The symbol is a non-terminal. Append new node to children.
+            tree.children.append(Tree(symbol["symbol"], tree))
+            
+            # recurse on the new node.
+            genome, output, nodes, d, max_depth = \
+                generate_tree(tree.children[-1], genome, output, method,
+                              nodes, depth, max_depth, depth_limit)
+
+    NT_kids = [kid for kid in tree.children if kid.root in
+               params['BNF_GRAMMAR'].non_terminals]
+
+    if not NT_kids:
+        # Then the branch terminates here
+        depth += 1
+        nodes += 1
+
+    if depth > max_depth:
+        # Set new maximum depth
+        max_depth = depth
+    
+    return genome, output, nodes, depth, max_depth
+
+def legal_productions(method, depth_limit, root, productions):
+    """
+    Returns the available production choices for a node given a specific
+    depth limit.
+    
+    :param method: A string specifying the desired tree derivation method.
+    Current methods are "random" or "full".
+    :param depth_limit: The overall depth limit of the desired tree from the
+    current node.
+    :param root: The root of the current node.
+    :param productions: The full list of production choices from the current
+    root node.
+    :return: The list of available production choices based on the specified
+    derivation method.
+    """
+
+    # Get all information about root node
+    root_info = params['BNF_GRAMMAR'].non_terminals[root]
+    
+    if method == "random":
+        # Randomly build a tree.
+        
+        if not depth_limit:
+            # There is no depth limit, any production choice can be used.
+            available = productions
+        
+        elif depth_limit > params['BNF_GRAMMAR'].max_arity + 1:
+            # If the depth limit is greater than the maximum arity of the
+            # grammar, then any production choice can be used.
+            available = productions
+
+        elif depth_limit < 0:
+            # If we have already surpassed the depth limit, then list the
+            # choices with the shortest terminating path.
+            available = root_info['min_path']
+        
+        else:
+            # The depth limit is less than or equal to the maximum arity of
+            # the grammar + 1. We have to be careful in selecting available
+            # production choices lest we generate a tree which violates the
+            # depth limit.
+            available = [prod for prod in productions if prod['max_path'] <=
+                         depth_limit - 1]
+
+            if not available:
+                # There are no available choices which do not violate the depth
+                # limit. List the choices with the shortest terminating path.
+                available = root_info['min_path']
+    
+    elif method == "full":
+        # Build a "full" tree where every branch extends to the depth limit.
+        
+        if not depth_limit:
+            # There is no depth limit specified for building a Full tree.
+            # Raise an error as a depth limit HAS to be specified here.
+            s = "representation.derivation.legal_productions\n" \
+                "Error: Depth limit not specified for `Full` tree derivation."
+            raise Exception(s)
+        
+        elif depth_limit > params['BNF_GRAMMAR'].max_arity + 1:
+            # If the depth limit is greater than the maximum arity of the
+            # grammar, then only recursive production choices can be used.
+            available = root_info['recursive']
+
+            if not available:
+                # There are no recursive production choices for the current
+                # rule. Pick any production choices.
+                available = productions
+
+        else:
+            # The depth limit is less than or equal to the maximum arity of
+            # the grammar + 1. We have to be careful in selecting available
+            # production choices lest we generate a tree which violates the
+            # depth limit.
+            available = [prod for prod in productions if prod['max_path'] ==
+                         depth_limit - 1]
+                        
+            if not available:
+                # There are no available choices which extend exactly to the
+                # depth limit. List the NT choices with the longest terminating
+                # paths that don't violate the limit.
+                available = [prod for prod in productions if prod['max_path']
+                             < depth_limit - 1]
+
+    return available
+
+"""
+grammar.py
+"""
 
 class Grammar(object):
     """
@@ -633,3 +816,517 @@ class Grammar(object):
     def __str__(self):
         return "%s %s %s %s" % (self.terminals, self.non_terminals,
                                 self.rules, self.start_rule)
+
+"""
+tree.py
+"""
+
+class Tree:
+
+    def __init__(self, expr, parent):
+        """
+        Initialise an instance of the tree class.
+        
+        :param expr: A non-terminal from the params['BNF_GRAMMAR'].
+        :param parent: The parent of the current node. None if node is tree
+        root.
+        """
+        
+        self.parent = parent
+        self.codon = None
+        self.depth = 1
+        self.root = expr
+        self.children = []
+        self.snippet = None
+
+    def __str__(self):
+        """
+        Builds a string of the current tree.
+        
+        :return: A string of the current tree.
+        """
+        
+        # Initialise the output string.
+        result = "("
+        
+        # Append the root of the current node to the output string.
+        result += str(self.root)
+        
+        for child in self.children:
+            # Iterate across all children.
+            
+            if len(child.children) > 0:
+                # Recurse through all children.
+                result += " " + str(child)
+            
+            else:
+                # Child is a terminal, append root to string.
+                result += " " + str(child.root)
+        
+        result += ")"
+        
+        return result
+
+    def __copy__(self):
+        """
+        Creates a new unique copy of self.
+        
+        :return: A new unique copy of self.
+        """
+
+        # Copy current tree by initialising a new instance of the tree class.
+        tree_copy = Tree(self.root, self.parent)
+        
+        # Set node parameters.
+        tree_copy.codon, tree_copy.depth = self.codon, self.depth
+
+        tree_copy.snippet = self.snippet
+
+        for child in self.children:
+            # Recurse through all children.
+            new_child = child.__copy__()
+            
+            # Set the parent of the copied child as the copied parent.
+            new_child.parent = tree_copy
+            
+            # Append the copied child to the copied parent.
+            tree_copy.children.append(new_child)
+
+        return tree_copy
+
+    def __eq__(self, other, same=True):
+        """
+        Set the definition for comparison of two instances of the tree
+        class by their attributes. Returns True if self == other.
+
+        :param other: Another instance of the tree class with which to compare.
+        :return: True if self == other.
+        """
+
+        # Get attributes of self and other.
+        a_self, a_other = vars(self), vars(other)
+                
+        # Don't look at the children as they are class instances themselves.
+        taboo = ["parent", "children", "snippet", "id"]
+        self_no_kids = {k: v for k, v in a_self.items() if k not in taboo}
+        other_no_kids = {k: v for k, v in a_other.items() if k not in taboo}
+                
+        # Compare attributes
+        if self_no_kids != other_no_kids:
+            # Attributes are not the same.
+            return False
+            
+        else:
+            # Attributes are the same
+            child_list = [self.children, other.children]
+            
+            if len(list(filter(lambda x: x is not None, child_list))) % 2 != 0:
+                # One contains children, the other doesn't.
+                return False
+
+            elif self.children and len(self.children) != len(other.children):
+                # Number of children differs between self and other.
+                return False
+
+            elif self.children:
+                # Compare children recursively.
+                for i, child in enumerate(self.children):
+                    same = child.__eq__(other.children[i], same)
+
+        return same
+
+    def get_target_nodes(self, array, target=None):
+        """
+        Returns the all NT nodes which match the target NT list in a
+        given tree.
+        
+        :param array: The array of all nodes that match the target.
+        :param target: The target nodes to match.
+        :return: The array of all nodes that match the target.
+        """
+            
+        if self.root in target:
+            # Check if the current node matches the target.
+            
+            # Add the current node to the array.
+            array.append(self)
+        
+        # Find all non-terminal children of the current node.
+        NT_kids = [kid for kid in self.children if kid.root in
+                   params['BNF_GRAMMAR'].non_terminals]
+        
+        for child in NT_kids:
+            if NT_kids:
+                # Recursively call function on any non-terminal children.
+                array = child.get_target_nodes(array, target=target)
+        
+        return array
+
+    def get_node_labels(self, labels):
+        """
+        Recurses through a tree and appends all node roots to a set.
+        
+        :param labels: The set of roots of all nodes in the tree.
+        :return: The set of roots of all nodes in the tree.
+        """
+        
+        # Add the current root to the set of all labels.
+        labels.add(self.root)
+
+        for child in self.children:
+            # Recurse on all children.
+            labels = child.get_node_labels(labels)
+        
+        return labels
+
+    def get_tree_info(self, nt_keys, genome, output, invalid=False,
+                      max_depth=0, nodes=0):
+        """
+        Recurses through a tree and returns all necessary information on a
+        tree required to generate an individual.
+        
+        :param genome: The list of all codons in a subtree.
+        :param output: The list of all terminal nodes in a subtree. This is
+        joined to become the phenotype.
+        :param invalid: A boolean flag for whether a tree is fully expanded.
+        True if invalid (unexpanded).
+        :param nt_keys: The list of all non-terminals in the grammar.
+        :param nodes: the number of nodes in a tree.
+        :param max_depth: The maximum depth of any node in the tree.
+        :return: genome, output, invalid, max_depth, nodes.
+        """
+
+        # Increment number of nodes in tree and set current node id.
+        nodes += 1
+        
+        if self.parent:
+            # If current node has a parent, increment current depth from
+            # parent depth.
+            self.depth = self.parent.depth + 1
+        
+        else:
+            # Current node is tree root, set depth to 1.
+            self.depth = 1
+        
+        if self.depth > max_depth:
+            # Set new max tree depth.
+            max_depth = self.depth
+
+        if self.codon:
+            # If the current node has a codon, append it to the genome.
+            genome.append(self.codon)
+
+        # Find all non-terminal children of current node.
+        NT_children = [child for child in self.children if child.root in
+                       nt_keys]
+        
+        if not NT_children:
+            # The current node has only terminal children, increment number
+            # of tree nodes.
+            nodes += 1
+
+            # Terminal children increase the current node depth by one.
+            # Check the recorded max_depth.
+            if self.depth + 1 > max_depth:
+                # Set new max tree depth.
+                max_depth = self.depth + 1
+
+        if self.root in nt_keys and not self.children:
+            # Current NT has no children. Invalid tree.
+            invalid = True
+
+        for child in self.children:
+            # Recurse on all children.
+
+            if not child.children:
+                # If the current child has no children it is a terminal.
+                # Append it to the phenotype output.
+                output.append(child.root)
+                
+                if child.root in nt_keys:
+                    # Current non-terminal node has no children; invalid tree.
+                    invalid = True
+            
+            else:
+                # The current child has children, recurse.
+                genome, output, invalid, max_depth, nodes = \
+                    child.get_tree_info(nt_keys, genome, output, invalid,
+                                        max_depth, nodes)
+
+        return genome, output, invalid, max_depth, nodes
+
+    def print_tree(self):
+        """
+        Prints out all nodes in the tree, indented according to node depth.
+        
+        :return: Nothing.
+        """
+
+        print(self.depth, "".join([" " for _ in range(self.depth)]), self.root)
+
+        for child in self.children:
+            if not child.children:
+                print(self.depth + 1,
+                      "".join([" " for _ in range(self.depth + 1)]),
+                      child.root)
+            else:
+                child.print_tree()
+
+"""
+individual.py
+"""
+
+class Individual(object):
+    """
+    A GE individual.
+    """
+
+    def __init__(self, genome, ind_tree, map_ind=True):
+        """
+        Initialise an instance of the individual class (i.e. create a new
+        individual).
+
+        :param genome: An individual's genome.
+        :param ind_tree: An individual's derivation tree, i.e. an instance
+        of the representation.tree.Tree class.
+        :param map_ind: A boolean flag that indicates whether or not an
+        individual needs to be mapped.
+        """
+
+        if map_ind:
+            # The individual needs to be mapped from the given input
+            # parameters.
+            self.phenotype, self.genome, self.tree, self.nodes, self.invalid, \
+                self.depth, self.used_codons = mapper(genome, ind_tree)
+
+        else:
+            # The individual does not need to be mapped.
+            self.genome, self.tree = genome, ind_tree
+
+        
+        self.fitness = params['FITNESS_FUNCTION'].default_fitness
+        self.runtime_error = False
+        self.name = None
+
+    def __lt__(self, other):
+        """
+        Set the definition for comparison of two instances of the individual
+        class by their fitness values. Allows for sorting/ordering of a
+        population of individuals. Note that numpy NaN is used for invalid
+        individuals and is used by some fitness functions as a default fitness.
+        We implement a custom catch for these NaN values.
+
+        :param other: Another instance of the individual class (i.e. another
+        individual) with which to compare.
+        :return: Whether or not the fitness of the current individual is
+        greater than the comparison individual.
+        """
+
+        if np.isnan(self.fitness): return True
+        elif np.isnan(other.fitness): return False
+        else: return self.fitness < other.fitness if params['FITNESS_FUNCTION'].maximise else other.fitness < self.fitness
+
+    def __le__(self, other):
+        """
+        Set the definition for comparison of two instances of the individual
+        class by their fitness values. Allows for sorting/ordering of a
+        population of individuals. Note that numpy NaN is used for invalid
+        individuals and is used by some fitness functions as a default fitness.
+        We implement a custom catch for these NaN values.
+
+        :param other: Another instance of the individual class (i.e. another
+        individual) with which to compare.
+        :return: Whether or not the fitness of the current individual is
+        greater than or equal to the comparison individual.
+        """
+
+        if np.isnan(self.fitness): return True
+        elif np.isnan(other.fitness): return False
+        else: return self.fitness <= other.fitness if params['FITNESS_FUNCTION'].maximise else other.fitness <= self.fitness
+
+    def __str__(self):
+        """
+        Generates a string by which individuals can be identified. Useful
+        for printing information about individuals.
+
+        :return: A string describing the individual.
+        """
+        return ("Individual: " +
+                str(self.phenotype) + "; " + str(self.fitness))
+
+    def deep_copy(self):
+        """
+        Copy an individual and return a unique version of that individual.
+
+        :return: A unique copy of the individual.
+        """
+
+        if not params['GENOME_OPERATIONS']:
+            # Create a new unique copy of the tree.
+            new_tree = self.tree.__copy__()
+
+        else:
+            new_tree = None
+
+        # Create a copy of self by initialising a new individual.
+        new_ind = Individual(self.genome.copy(), new_tree, map_ind=False)
+
+        # Set new individual parameters (no need to map genome to new
+        # individual).
+        new_ind.phenotype, new_ind.invalid = self.phenotype, self.invalid
+        new_ind.depth, new_ind.nodes = self.depth, self.nodes
+        new_ind.used_codons = self.used_codons
+        new_ind.runtime_error = self.runtime_error
+
+        return new_ind
+
+    def evaluate(self):
+        """
+        Evaluates phenotype in using the fitness function set in the params
+        dictionary. For regression/classification problems, allows for
+        evaluation on either training or test distributions. Sets fitness
+        value.
+
+        :return: Nothing unless multicore evaluation is being used. In that
+        case, returns self.
+        """
+
+        # Evaluate fitness using specified fitness function.
+        self.fitness = params['FITNESS_FUNCTION'](self)
+
+        if params['MULTICORE']:
+            return self
+
+
+def map_tree_from_genome(genome):
+    """
+    Maps a full tree from a given genome.
+
+    :param genome: A genome to be mapped.
+    :return: All components necessary for a fully mapped individual.
+    """
+
+    # Initialise an instance of the tree class
+    tree = Tree(str(params['BNF_GRAMMAR'].start_rule["symbol"]), None)
+
+    # Map tree from the given genome
+    output, used_codons, nodes, depth, max_depth, invalid = \
+        genome_tree_map(tree, genome, [], 0, 0, 0, 0)
+
+    # Build phenotype.
+    phenotype = "".join(output)
+
+    if invalid:
+        # Return "None" phenotype if invalid
+        return None, genome, tree, nodes, invalid, max_depth, \
+           used_codons
+
+    else:
+        return phenotype, genome, tree, nodes, invalid, max_depth, \
+           used_codons
+
+
+def genome_tree_map(tree, genome, output, index, depth, max_depth, nodes,
+                    invalid=False):
+    """
+    Recursive function which builds a tree using production choices from a
+    given genome. Not guaranteed to terminate.
+
+    :param tree: An instance of the representation.tree.Tree class.
+    :param genome: A full genome.
+    :param output: The list of all terminal nodes in a subtree. This is
+    joined to become the phenotype.
+    :param index: The index of the current location on the genome.
+    :param depth: The current depth in the tree.
+    :param max_depth: The maximum overall depth in the tree so far.
+    :param nodes: The total number of nodes in the tree thus far.
+    :param invalid: A boolean flag indicating whether or not the individual
+    is invalid.
+    :return: index, the index of the current location on the genome,
+             nodes, the total number of nodes in the tree thus far,
+             depth, the current depth in the tree,
+             max_depth, the maximum overall depth in the tree,
+             invalid, a boolean flag indicating whether or not the
+             individual is invalid.
+    """
+
+    if not invalid and index < len(genome) * (params['MAX_WRAPS'] + 1):
+        # If the solution is not invalid thus far, and if we still have
+        # remaining codons in the genome, then we can continue to map the tree.
+
+        if params['MAX_TREE_DEPTH'] and (max_depth > params['MAX_TREE_DEPTH']):
+            # We have breached our maximum tree depth limit.
+            invalid = True
+
+        # Increment and set number of nodes and current depth.
+        nodes += 1
+        depth += 1
+        tree.id, tree.depth = nodes, depth
+
+        # Find all production choices and the number of those production
+        # choices that can be made by the current root non-terminal.
+        productions = params['BNF_GRAMMAR'].rules[tree.root]['choices']
+        no_choices = params['BNF_GRAMMAR'].rules[tree.root]['no_choices']
+
+        # Set the current codon value from the genome.
+        tree.codon = genome[index % len(genome)]
+
+        # Select the index of the correct production from the list.
+        selection = tree.codon % no_choices
+
+        # Set the chosen production
+        chosen_prod = productions[selection]
+
+        # Increment the index
+        index += 1
+
+        # Initialise an empty list of children.
+        tree.children = []
+
+        for symbol in chosen_prod['choice']:
+            # Add children to the derivation tree by creating a new instance
+            # of the representation.tree.Tree class for each child.
+
+            if symbol["type"] == "T":
+                # Append the child to the parent node. Child is a terminal, do
+                # not recurse.
+                tree.children.append(Tree(symbol["symbol"], tree))
+                output.append(symbol["symbol"])
+
+            elif symbol["type"] == "NT":
+                # Append the child to the parent node.
+                tree.children.append(Tree(symbol["symbol"], tree))
+
+                # Recurse by calling the function again to map the next
+                # non-terminal from the genome.
+                output, index, nodes, d, max_depth, invalid = \
+                    genome_tree_map(tree.children[-1], genome, output,
+                                    index, depth, max_depth, nodes,
+                                    invalid=invalid)
+
+    else:
+        # Mapping incomplete, solution is invalid.
+        return output, index, nodes, depth, max_depth, True
+
+    # Find all non-terminals in the chosen production choice.
+    NT_kids = [kid for kid in tree.children if kid.root in
+               params['BNF_GRAMMAR'].non_terminals]
+
+    if not NT_kids:
+        # There are no non-terminals in the chosen production choice, the
+        # branch terminates here.
+        depth += 1
+        nodes += 1
+
+    if not invalid:
+        # The solution is valid thus far.
+
+        if depth > max_depth:
+            # Set the new maximum depth.
+            max_depth = depth
+
+        if params['MAX_TREE_DEPTH'] and (max_depth > params['MAX_TREE_DEPTH']):
+            # If our maximum depth exceeds the limit, the solution is invalid.
+            invalid = True
+
+    return output, index, nodes, depth, max_depth, invalid

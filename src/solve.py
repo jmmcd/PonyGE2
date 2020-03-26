@@ -1,6 +1,6 @@
-from algorithm.parameters import set_params
+from utilities import set_params
 from ponyge import mane
-from fitness.arc_evaluate import apply
+from arc_evaluate import apply
 import numpy as np
 
 def pad(x):
@@ -20,7 +20,7 @@ def solve_task(task_nr):
         "--generations", "500", 
         "--max_genome_length", "500", 
         "--grammar_file", "arc.bnf", 
-        "--initialisation", "uniform_tree", 
+        "--initialisation", "operators.uniform_tree", 
         "--max_init_tree_depth", "5", 
         "--max_tree_depth", "30", 
         "--mutation_probability", "0.25", 

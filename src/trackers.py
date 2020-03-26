@@ -1,3 +1,7 @@
+"""
+trackers.py
+"""
+
 """Utilities for tracking progress of runs, including time taken per
 generation, fitness plots, fitness caches, etc."""
 

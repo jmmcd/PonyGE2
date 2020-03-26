@@ -1,16 +1,14 @@
+"""Algorithm parameters"""
 from multiprocessing import cpu_count
-from os import path
 from socket import gethostname
 
 hostname = gethostname().split('.')
 machine_name = hostname[0]
 
-
-"""Algorithm parameters"""
 params = {
         # Set default step and search loop functions
-        'SEARCH_LOOP': 'search_loop',
-        'STEP': 'step',
+        'SEARCH_LOOP': 'algorithm.search_loop',
+        'STEP': 'algorithm.step',
 
         # Evolutionary Parameters
         'POPULATION_SIZE': 500,
@@ -59,7 +57,7 @@ params = {
 
         # INITIALISATION
         # Set initialisation operator.
-        'INITIALISATION': "operators.initialisation.PI_grow",
+        'INITIALISATION': "operators.PI_grow",
         # Set the maximum geneome length for initialisation.
         'INIT_GENOME_LENGTH': 200,
         # Set the maximum tree depth for initialisation.
@@ -69,7 +67,7 @@ params = {
 
         # SELECTION
         # Set selection operator.
-        'SELECTION': "operators.selection.tournament",
+        'SELECTION': "operators.tournament",
         # For tournament selection
         'TOURNAMENT_SIZE': 2,
         # For truncation selection
@@ -84,7 +82,7 @@ params = {
 
         # CROSSOVER
         # Set crossover operator.
-        'CROSSOVER': "operators.crossover.variable_onepoint",
+        'CROSSOVER': "operators.variable_onepoint",
         # Set crossover probability.
         'CROSSOVER_PROBABILITY': 0.75,
         # Prevents crossover from generating invalids.
@@ -92,7 +90,7 @@ params = {
 
         # MUTATION
         # Set mutation operator.
-        'MUTATION': "operators.mutation.int_flip_per_codon",
+        'MUTATION': "operators.int_flip_per_codon",
         # Set mutation probability (None defaults to 1 over the length of
         # the genome for each codon)
         'MUTATION_PROBABILITY': None,
@@ -103,7 +101,7 @@ params = {
 
         # REPLACEMENT
         # Set replacement operator.
-        'REPLACEMENT': "operators.replacement.generational",
+        'REPLACEMENT': "operators.generational",
         # Set elite size.
         'ELITE_SIZE': None,
 
@@ -188,112 +186,3 @@ params = {
         # Set machine name (useful for doing multiple runs)
         'MACHINE': machine_name
 }
-
-def set_params(command_line_args, create_files=True):
-    """
-    This function parses all command line arguments specified by the user.
-    If certain parameters are not set then defaults are used (e.g. random
-    seeds, elite size). Sets the correct imports given command line
-    arguments. Sets correct grammar file and fitness function. Also
-    initialises save folders and tracker lists in utilities.trackers.
-
-    :param command_line_args: Command line arguments specified by the user.
-    :return: Nothing.
-    """
-
-    from utilities.algorithm.initialise_run import initialise_run_params
-    from utilities.algorithm.initialise_run import set_param_imports
-    from utilities.fitness.math_functions import return_one_percent
-    from utilities.algorithm.command_line_parser import parse_cmd_args
-    from utilities.stats import trackers
-    from representation import grammar
-
-    cmd_args, unknown = parse_cmd_args(command_line_args)
-
-    if unknown:
-        # We currently do not parse unknown parameters. Raise error.
-        s = "algorithm.parameters.set_params\nError: " \
-            "unknown parameters: %s\nYou may wish to check the spelling, " \
-            "add code to recognise this parameter, or use " \
-            "--extra_parameters" % str(unknown)
-        raise Exception(s)
-
-
-    # Join original params dictionary with command line specified arguments.
-    # NOTE that command line arguments overwrite all previously set parameters.
-    params.update(cmd_args)
-
-    if params['REPLACEMENT'].split(".")[-1] == "steady_state":
-        # Set steady state step and replacement.
-        params['STEP'] = "steady_state_step"
-        params['GENERATION_SIZE'] = 2
-
-    else:
-        # Elite size is set to either 1 or 1% of the population size,
-        # whichever is bigger if no elite size is previously set.
-        if params['ELITE_SIZE'] is None:
-            params['ELITE_SIZE'] = return_one_percent(1, params[
-                'POPULATION_SIZE'])
-
-        # Set the size of a generation
-        params['GENERATION_SIZE'] = params['POPULATION_SIZE'] - \
-                                    params['ELITE_SIZE']
-
-    # Initialise run lists and folders before we set imports.r
-    initialise_run_params(create_files)
-
-    # Set correct param imports for specified function options, including
-    # error metrics and fitness functions.
-    set_param_imports()
-
-    # Set GENOME_OPERATIONS automatically for faster linear operations.
-    if (params['CROSSOVER'].representation == "subtree" or
-        params['MUTATION'].representation == "subtree"):
-        params['GENOME_OPERATIONS'] = False
-    else:
-        params['GENOME_OPERATIONS'] = True
-
-    # Ensure correct operators are used if multiple fitness functions used.
-    if hasattr(params['FITNESS_FUNCTION'], 'multi_objective'):
-
-        # Check that multi-objective compatible selection is specified.
-        if not hasattr(params['SELECTION'], "multi_objective"):
-            s = "algorithm.parameters.set_params\n" \
-                "Error: multi-objective compatible selection " \
-                "operator not specified for use with multiple " \
-                "fitness functions."
-            raise Exception(s)
-
-        if not hasattr(params['REPLACEMENT'], "multi_objective"):
-
-            # Check that multi-objective compatible replacement is
-            # specified.
-            if not hasattr(params['REPLACEMENT'], "multi_objective"):
-                s = "algorithm.parameters.set_params\n" \
-                    "Error: multi-objective compatible replacement " \
-                    "operator not specified for use with multiple " \
-                    "fitness functions."
-                raise Exception(s)
-
-    # Parse grammar file and set grammar class.
-    params['BNF_GRAMMAR'] = grammar.Grammar(path.join("..", "grammars",
-                                            params['GRAMMAR_FILE']))
-
-    # Population loading for seeding runs (if specified)
-    if params['TARGET_SEED_FOLDER']:
-
-        # Import population loading function.
-        from operators.initialisation import load_population
-
-        # A target folder containing seed individuals has been given.
-        params['SEED_INDIVIDUALS'] = load_population(
-            params['TARGET_SEED_FOLDER'])
-
-    elif params['REVERSE_MAPPING_TARGET']:
-        # A single seed phenotype has been given. Parse and run.
-
-        # Import GE LR Parser.
-        from scripts import GE_LR_parser
-
-        # Parse seed individual and store in params.
-        params['SEED_INDIVIDUALS'] = [GE_LR_parser.main()]

@@ -1,3 +1,6 @@
+"""
+python_filter.py
+"""
 def python_filter(txt):
     """ Create correct python syntax.
 

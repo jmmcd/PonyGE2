@@ -3,8 +3,8 @@ from sys import stdout
 from time import time
 import numpy as np
 
-from algorithm.parameters import params
-from utilities.stats import trackers
+from parameters import params
+import trackers
 
 
 """Algorithm statistics"""

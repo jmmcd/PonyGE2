@@ -1,11 +1,11 @@
-# TODO: Mit besserem data loader sollte das hier obsolet werden
-
+from parameters import params
 from os import path
-
 import numpy as np
+"""
+get_data.py
+"""
 
-from algorithm.parameters import params
-
+# TODO: Mit besserem data loader sollte das hier obsolet werden
 
 def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
     """
