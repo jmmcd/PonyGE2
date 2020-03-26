@@ -15,9 +15,9 @@ def pad(x):
 
     return s
 
-training_path = "../../training/"
-evaluation_path = "../../evaluation/"
-test_path = "../../test/"
+training_path = "../training/"
+evaluation_path = "../evaluation/"
+test_path = "../test/"
 
 training_tasks = sorted(listdir(training_path))
 evaluation_tasks = sorted(listdir(evaluation_path))
