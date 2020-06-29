@@ -129,61 +129,62 @@ def int_flip_per_ind(ind):
 def subtree(ind):
     """
     Mutate the individual by replacing a randomly selected subtree with a
-    new randomly generated subtree. Guaranteed one event per individual, unless
-    params['MUTATION_EVENTS'] is specified as a higher number.
+    new randomly generated subtree. params['MUTATION_PROBABILITY'] determines 
+    the probability of a mutation to occur. Usually one mutation per individual, 
+    unless params['MUTATION_EVENTS'] is specified as a higher number.
 
     :param ind: An individual to be mutated.
     :return: A mutated individual.
     """
+    if params.get('MUTATION_PROBABILITY', 0.) > random():
+        def subtree_mutate(ind_tree):
+            """
+            Creates a list of all nodes and picks one node at random to mutate.
+            Because we have a list of all nodes, we can (but currently don't)
+            choose what kind of nodes to mutate on. Handy.
 
-    def subtree_mutate(ind_tree):
-        """
-        Creates a list of all nodes and picks one node at random to mutate.
-        Because we have a list of all nodes, we can (but currently don't)
-        choose what kind of nodes to mutate on. Handy.
+            :param ind_tree: The full tree of an individual.
+            :return: The full mutated tree and the associated genome.
+            """
 
-        :param ind_tree: The full tree of an individual.
-        :return: The full mutated tree and the associated genome.
-        """
+            # Find the list of nodes we can mutate from.
+            targets = ind_tree.get_target_nodes([], target=params[
+                                              'BNF_GRAMMAR'].non_terminals)
 
-        # Find the list of nodes we can mutate from.
-        targets = ind_tree.get_target_nodes([], target=params[
-                                          'BNF_GRAMMAR'].non_terminals)
+            # Pick a node.
+            new_tree = choice(targets)
 
-        # Pick a node.
-        new_tree = choice(targets)
+            # Set the depth limits for the new subtree.
+            if params['MAX_TREE_DEPTH']:
+                # Set the limit to the tree depth.
+                max_depth = params['MAX_TREE_DEPTH'] - new_tree.depth
 
-        # Set the depth limits for the new subtree.
-        if params['MAX_TREE_DEPTH']:
-            # Set the limit to the tree depth.
-            max_depth = params['MAX_TREE_DEPTH'] - new_tree.depth
+            else:
+                # There is no limit to tree depth.
+                max_depth = None
+
+            # Mutate a new subtree.
+            generate_tree(new_tree, [], [], "random", 0, 0, 0, max_depth)
+
+            return ind_tree
+
+        if ind.invalid:
+            # The individual is invalid.
+            tail = []
 
         else:
-            # There is no limit to tree depth.
-            max_depth = None
+            # Save the tail of the genome.
+            tail = ind.genome[ind.used_codons:]
 
-        # Mutate a new subtree.
-        generate_tree(new_tree, [], [], "random", 0, 0, 0, max_depth)
+        # Allows for multiple mutation events should that be desired.
+        for i in range(params['MUTATION_EVENTS']):
+            ind.tree = subtree_mutate(ind.tree)
 
-        return ind_tree
+        # Re-build a new individual with the newly mutated genetic information.
+        ind = individual.Individual(None, ind.tree)
 
-    if ind.invalid:
-        # The individual is invalid.
-        tail = []
-
-    else:
-        # Save the tail of the genome.
-        tail = ind.genome[ind.used_codons:]
-
-    # Allows for multiple mutation events should that be desired.
-    for i in range(params['MUTATION_EVENTS']):
-        ind.tree = subtree_mutate(ind.tree)
-
-    # Re-build a new individual with the newly mutated genetic information.
-    ind = individual.Individual(None, ind.tree)
-
-    # Add in the previous tail.
-    ind.genome = ind.genome + tail
+        # Add in the previous tail.
+        ind.genome = ind.genome + tail
 
     return ind
 
