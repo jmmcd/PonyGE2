@@ -1,9 +1,8 @@
-from algorithm.parameters import params
-from fitness.base_ff_classes.base_ff import base_ff
-
+import dtw  # https://pypi.python.org/pypi/dtw
 import editdistance  # https://pypi.python.org/pypi/editdistance
 import lzstring  # https://pypi.python.org/pypi/lzstring/
-import dtw  # https://pypi.python.org/pypi/dtw
+from algorithm.parameters import params
+from fitness.base_ff_classes.base_ff import base_ff
 
 """
 
@@ -36,8 +35,8 @@ def succ(n, maxv=6):
     :param maxv:
     :return:
     """
-    
-    return min(n+1, maxv)
+
+    return min(n + 1, maxv)
 
 
 def pred(n, minv=0):
@@ -48,8 +47,8 @@ def pred(n, minv=0):
     :param minv:
     :return:
     """
-    
-    return max(n-1, minv)
+
+    return max(n - 1, minv)
 
 
 def truncate(n, g):
@@ -61,7 +60,7 @@ def truncate(n, g):
     :param g:
     :return:
     """
-    
+
     for i in range(n):
         yield next(g)
 
@@ -74,7 +73,7 @@ def dist(t0, x0):
     :param x0:
     :return:
     """
-    
+
     return abs(t0 - x0)
 
 
@@ -86,11 +85,11 @@ def dtw_dist(s, t):
     :param t:
     :return:
     """
-    
+
     s = list(map(int, s))
     t = list(map(int, t))
     d, M, C, path = dtw.dtw(s, t, dist)
-    
+
     return d
 
 
@@ -105,7 +104,7 @@ def lev_dist(s, t):
     :param t:
     :return:
     """
-    
+
     return editdistance.eval(s, t) / len(s)
 
 
@@ -117,7 +116,7 @@ def compress(s):
     :param s:
     :return:
     """
-    
+
     s = ''.join(map(str, s))
     return lzstring.LZString().compress(s)
 
@@ -130,7 +129,7 @@ def compressibility(s):
     :param s:
     :return:
     """
-    
+
     return 1 - len(compress(s)) / len(s)
 
 
@@ -143,26 +142,26 @@ def proglen(s):
     :param s: A string of a program phenotype.
     :return: The length of the program divided by 100.
     """
-    
+
     return len(s) / 100.0
 
 
 class sequence_match(base_ff):
-        
+
     def __init__(self):
         """
-        Initilise class instance
+        Initialise class instance
         """
         # Initialise base fitness function class.
         super().__init__()
-        
+
         # --target will be a sequence such as (0, 5, 0, 5)
         self.target = eval(params['TARGET'])
-        
+
         # we assume --extra_parameters is a comma-separated kv sequence, eg:
         # "alpha=0.5, beta=0.5, gamma=0.5"
         # which we can pass to the dict() constructor
-        extra_fit_params = eval("dict("+params['EXTRA_PARAMETERS']+")")
+        extra_fit_params = eval("dict(" + params['EXTRA_PARAMETERS'] + ")")
         self.alpha = extra_fit_params['alpha']
         self.beta = extra_fit_params['beta']
         self.gamma = extra_fit_params['gamma']
@@ -176,7 +175,7 @@ class sequence_match(base_ff):
         :param ind:
         :return:
         """
-        
+
         p, d = ind.phenotype, {'pred': pred, 'succ': succ}
         exec(p, d)
 
@@ -185,7 +184,7 @@ class sequence_match(base_ff):
 
         # Truncate the generator and convert to list
         s = list(truncate(len(self.target), s))
-        
+
         # Set target
         t = self.target
 
@@ -219,7 +218,7 @@ class sequence_match(base_ff):
             else:
                 compressibility_v = 0.0
             length_v = self.beta * proglen_v + (1 - self.beta) * \
-                                               compressibility_v
+                       compressibility_v
         else:
             length_v = 0.0
 

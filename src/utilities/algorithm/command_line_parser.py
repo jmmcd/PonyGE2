@@ -9,7 +9,7 @@ class SortingHelpFormatter(argparse.HelpFormatter):
     this custom class, arguments will be printed in the order in which they are
     defined.
     """
-    
+
     def add_arguments(self, actions):
         actions = sorted(actions, key=attrgetter('option_strings'))
         super(SortingHelpFormatter, self).add_arguments(actions)
@@ -69,7 +69,7 @@ def parse_cmd_args(arguments):
 
         def __init__(self, option_strings, **kwargs):
             super(ListAction, self).__init__(option_strings, **kwargs)
-    
+
         def __call__(self, parser, namespace, value, option_string=None):
             if type(eval(value)) != list or any([type(i) != int for i in
                                                  eval(value)]):
@@ -103,10 +103,10 @@ def parse_cmd_args(arguments):
         """
         Class for checking raw string arguments to catch "tab" inputs.
         """
-    
+
         def __init__(self, option_strings, **kwargs):
             super(CatchTabStr, self).__init__(option_strings, **kwargs)
-    
+
         def __call__(self, parser, namespace, value, option_string=None):
             if repr(value) == repr("\\t"):
                 value = "\t"
@@ -144,7 +144,7 @@ def parse_cmd_args(arguments):
                         dest='HILL_CLIMBING_HISTORY',
                         type=int,
                         help='Sets the history-length for late-acceptance'
-                        'and step-counting hill-climbing.')
+                             'and step-counting hill-climbing.')
     parser.add_argument('--schc_count_method',
                         dest='SCHC_COUNT_METHOD',
                         type=str,
@@ -250,7 +250,7 @@ def parse_cmd_args(arguments):
                         help='Boolean flag for selecting whether or not '
                              'mutation is confined to within the used portion '
                              'of the genome. Default set to True.')
-    
+
     # CROSSOVER
     parser.add_argument('--crossover',
                         dest='CROSSOVER',
@@ -354,7 +354,7 @@ def parse_cmd_args(arguments):
                         type=int,
                         help='Specify the number of cores to be used for '
                              'multi-core evaluation. Requires int.')
-    
+
     # REPLACEMENT
     parser.add_argument('--replacement',
                         dest='REPLACEMENT',
@@ -467,14 +467,13 @@ def parse_cmd_args(arguments):
                              'desired state file. Note that state files have '
                              'no file type.')
 
-
     # MULTIAGENT
     parser.add_argument('--multiagent',
                         dest='MULTIAGENT',
                         action='store_true',
-                        default=None,                        
+                        default=None,
                         help='This enable the multi-agent mode. If this mode is'
-                             ' enabled the search_loop and step parameter are' 
+                             ' enabled the search_loop and step parameter are'
                              ' overridden with search_multiagent and step_multiagent'
                              ' respectively')
     parser.add_argument('--agent_size',
@@ -511,11 +510,11 @@ def parse_cmd_args(arguments):
         def __call__(self, parser, namespace, values, option_string=None):
             setattr(namespace, 'CACHE', self.CACHE)
             if 'LOOKUP_FITNESS' not in namespace or \
-                            getattr(namespace, 'LOOKUP_FITNESS') is not False:
+                    getattr(namespace, 'LOOKUP_FITNESS') is not False:
                 # able to overwrite if True or None
                 setattr(namespace, 'LOOKUP_FITNESS', self.LOOKUP_FITNESS)
             if self.LOOKUP_BAD_FITNESS and \
-                            'LOOKUP_BAD_FITNESS' not in namespace:
+                    'LOOKUP_BAD_FITNESS' not in namespace:
                 setattr(namespace, 'LOOKUP_BAD_FITNESS',
                         self.LOOKUP_BAD_FITNESS)
             if self.MUTATE_DUPLICATES and 'MUTATE_DUPLICATES' not in namespace:
@@ -569,10 +568,10 @@ def parse_cmd_args(arguments):
     # Set "None" values correctly.
     for key in sorted(cmd_args.keys()):
         # Check all specified arguments.
-        
+
         if type(cmd_args[key]) == str and cmd_args[key].lower() == "none":
             # Allow for people not using correct capitalisation.
-            
+
             cmd_args[key] = None
 
     return cmd_args, unknown

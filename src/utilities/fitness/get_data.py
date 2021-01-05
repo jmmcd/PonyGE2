@@ -1,7 +1,6 @@
 from os import path
 
 import numpy as np
-
 from algorithm.parameters import params
 
 
@@ -20,7 +19,7 @@ def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
     if params['DATASET_DELIMITER']:
         # Dataset delimiter has been explicitly specified.
         delimiter = params['DATASET_DELIMITER']
-    
+
     else:
         # Try to auto-detect the field separator (i.e. delimiter).
         f = open(train_filename)
@@ -28,7 +27,7 @@ def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
             if line.startswith("#") or len(line) < 2:
                 # Skip excessively short lines or commented out lines.
                 continue
-                
+
             else:
                 # Set the delimiter.
                 if "\t" in line:
@@ -44,22 +43,23 @@ def get_Xy_train_test_separate(train_filename, test_filename, skip_header=0):
                     delimiter = ":"
                     break
                 else:
-                    print("utilities.fitness.get_data.get_Xy_train_test_separate\n"
-                          "Warning: Dataset delimiter not found. "
-                          "Defaulting to whitespace delimiter.")
+                    print(
+                        "utilities.fitness.get_data.get_Xy_train_test_separate\n"
+                        "Warning: Dataset delimiter not found. "
+                        "Defaulting to whitespace delimiter.")
                     delimiter = " "
                     break
         f.close()
-    
+
     # Read in all training data.
     train_Xy = np.genfromtxt(train_filename, skip_header=skip_header,
                              delimiter=delimiter)
-    
+
     try:
         # Separate out input (X) and output (y) data.
         train_X = train_Xy[:, :-1].transpose()  # all columns but last
         train_y = train_Xy[:, -1].transpose()  # last column
-    
+
     except IndexError:
         s = "utilities.fitness.get_data.get_Xy_train_test_separate\n" \
             "Error: specified delimiter '%s' incorrectly parses training " \
@@ -89,20 +89,20 @@ def get_data(train, test):
     :param test: The desired testing dataset.
     :return: The parsed data contained in the dataset files.
     """
-    
+
     # Get the path to the training dataset.
     train_set = path.join("..", "datasets", train)
-        
+
     if test:
         # Get the path to the testing dataset.
         test_set = path.join("..", "datasets", test)
-    
+
     else:
         # There is no testing dataset used.
         test_set = None
-    
+
     # Read in the training and testing datasets from the specified files.
     training_in, training_out, test_in, \
     test_out = get_Xy_train_test_separate(train_set, test_set, skip_header=1)
-    
+
     return training_in, training_out, test_in, test_out

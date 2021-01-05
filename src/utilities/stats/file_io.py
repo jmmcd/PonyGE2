@@ -1,6 +1,6 @@
-from os import path, getcwd, makedirs
-from shutil import rmtree
 from copy import copy
+from os import getcwd, makedirs, path
+from shutil import rmtree
 
 from algorithm.parameters import params
 from utilities.stats import trackers
@@ -94,11 +94,10 @@ def save_first_front_to_file(stats, end=False, name="first"):
     orig_file_path = copy(params['FILE_PATH'])
 
     # Define the new file path.
-    params['FILE_PATH'] = path.join(orig_file_path, str(name)+"_front")
+    params['FILE_PATH'] = path.join(orig_file_path, str(name) + "_front")
 
     # Check if the front folder exists already
     if path.exists(params['FILE_PATH']):
-
         # Remove previous files.
         rmtree(params['FILE_PATH'])
 
@@ -142,7 +141,7 @@ def generate_folders_and_files():
     if not path.isdir(path.join(params['FILE_PATH'],
                                 str(params['TIME_STAMP']))):
         makedirs(path.join(params['FILE_PATH'],
-                        str(params['TIME_STAMP'])))
+                           str(params['TIME_STAMP'])))
 
     params['FILE_PATH'] = path.join(params['FILE_PATH'],
                                     str(params['TIME_STAMP']))
@@ -165,7 +164,6 @@ def save_params_to_file():
     col_width = max(len(param) for param in params.keys())
 
     for param in sorted(params.keys()):
-
         # Create whitespace buffer for pretty printing/saving.
         spaces = [" " for _ in range(col_width - len(param))]
         savefile.write(str(param) + ": " + "".join(spaces) +

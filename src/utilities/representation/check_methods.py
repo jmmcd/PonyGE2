@@ -1,6 +1,6 @@
+import numpy as np
 from algorithm.parameters import params
 from representation import individual
-import numpy as np
 
 
 def check_ind(ind, check):
@@ -43,24 +43,24 @@ def check_genome_mapping(ind):
     :param ind: An instance of the representation.individual.Individual class.
     :return: Nothing.
     """
-    
+
     # Re-map individual using fast genome mapper to check everything is ok
     new_ind = individual.Individual(ind.genome, None)
-    
+
     # Get attributes of both individuals.
     attributes_0 = vars(ind)
     attributes_1 = vars(new_ind)
-    
+
     if params['GENOME_OPERATIONS']:
         # If this parameter is set then the new individual will have no tree.
         attributes_0['tree'] = None
-    
+
     else:
         if attributes_0['tree'] != attributes_1['tree']:
             s = "utilities.representation.check_methods.check_ind.\n" \
                 "Error: Individual trees do not match."
             raise Exception(s)
-    
+
     # Check that all attributes match across both individuals.
     for a_0 in sorted(attributes_0.keys()):
         for a_1 in sorted(attributes_1.keys()):
@@ -69,7 +69,6 @@ def check_genome_mapping(ind):
                      type(attributes_1[a_1]) is float and
                      np.isnan(attributes_0[a_0]) and
                      np.isnan(attributes_1[a_1])):
-
                 s = "utilities.representation.check_methods." \
                     "check_genome_mapping\n" \
                     "Error: Individual attributes do not match genome-" \
@@ -80,7 +79,7 @@ def check_genome_mapping(ind):
                     "           %s :\t %s" % \
                     (a_0, attributes_0[a_0], a_1, attributes_1[a_1])
                 raise Exception(s)
-            
+
 
 def check_ind_from_parser(ind, target):
     """
@@ -95,7 +94,7 @@ def check_ind_from_parser(ind, target):
 
     # Re-map individual using genome mapper to check everything is ok.
     new_ind = individual.Individual(ind.genome, None)
-    
+
     # Check phenotypes are the same.
     if new_ind.phenotype != ind.phenotype:
         s = "utilities.representation.check_methods.check_ind_from_parser\n" \
@@ -105,7 +104,7 @@ def check_ind_from_parser(ind, target):
             "       Derived genome:      \t %s" % \
             (ind.phenotype, new_ind.phenotype, ind.genome)
         raise Exception(s)
-    
+
     # Check the phenotype matches the target string.
     elif ind.phenotype != target:
         s = "utilities.representation.check_methods.check_ind_from_parser\n" \
@@ -113,7 +112,7 @@ def check_ind_from_parser(ind, target):
             "       Target:   \t %s\n" \
             "       Solution: \t %s" % (target, ind.phenotype)
         raise Exception(s)
-    
+
     else:
         # Check the tree matches the phenotype.
         check_genome_mapping(ind)
@@ -131,17 +130,17 @@ def check_genome_from_tree(ind_tree):
 
     if ind_tree.children:
         # This node has children and thus must have an associated codon.
-        
+
         if not ind_tree.codon:
             s = "utilities.representation.check_methods." \
                 "check_genome_from_tree\n" \
                 "Error: Node with children has no codon.\n" \
                 "       %s" % (str(ind_tree.children))
             raise Exception(s)
-        
+
         # Check production choices for node root.
         productions = params['BNF_GRAMMAR'].rules[ind_tree.root]['choices']
-        
+
         # Select choice based on node codon.
         selection = ind_tree.codon % len(productions)
         chosen_prod = productions[selection]
@@ -153,7 +152,7 @@ def check_genome_from_tree(ind_tree):
         # Build list of the roots of all node children.
         for kid in ind_tree.children:
             roots.append(kid.root)
-        
+
         # Match production roots with children roots.
         if roots != prods:
             s = "utilities.representation.check_methods." \
@@ -162,7 +161,7 @@ def check_genome_from_tree(ind_tree):
                 "       Codon productions:\t%s\n       " \
                 "       Actual children:\t%s" % (str(prods), str(roots))
             raise Exception(s)
-    
+
     for kid in ind_tree.children:
         # Recurse over all children.
         check_genome_from_tree(kid)
@@ -177,7 +176,7 @@ def check_expansion(tree, nt_keys):
     :param nt_keys: The list of all non-terminals.
     :return: True if tree is not fully expanded, else False.
     """
-    
+
     check = False
     if tree.root in nt_keys:
         # Current node is a NT and should have children
@@ -186,15 +185,15 @@ def check_expansion(tree, nt_keys):
             for child in tree.children:
                 # Recurse over all children.
                 check = child.check_expansion(nt_keys)
-                
+
                 if check:
                     # End recursion.
                     break
-        
+
         else:
             # Current node is not completely expanded.
             check = True
-    
+
     return check
 
 
@@ -206,15 +205,15 @@ def build_genome(tree, genome):
     :param genome: The list of all codons in a subtree.
     :return: The fully built genome of a subtree.
     """
-    
+
     if tree.codon:
         # If the current node has a codon, append it to the genome.
         genome.append(tree.codon)
-    
+
     for child in tree.children:
         # Recurse on all children.
         genome = child.build_genome(genome)
-    
+
     return genome
 
 
@@ -236,29 +235,29 @@ def get_nodes_and_depth(tree, nodes=0, max_depth=0):
         tree.depth = tree.parent.depth + 1
     else:
         tree.depth = 1
-        
+
     # Check the recorded max_depth.
     if tree.depth > max_depth:
         max_depth = tree.depth
-        
+
     # Create list of all non-terminal children of current node.
     NT_kids = [kid for kid in tree.children if kid.root in
                params['BNF_GRAMMAR'].non_terminals]
-    
+
     if not NT_kids and get_output(tree):
         # Current node has only terminal children.
         nodes += 1
-        
+
         # Terminal children increase the current node depth by one.
         # Check the recorded max_depth.
         if tree.depth + 1 > max_depth:
             max_depth = tree.depth + 1
-    
+
     else:
         for child in NT_kids:
             # Recurse over all children.
             nodes, max_depth = get_nodes_and_depth(child, nodes, max_depth)
-    
+
     return nodes, max_depth
 
 
@@ -270,7 +269,7 @@ def get_max_tree_depth(tree, max_depth=1):
     :param max_depth: The maximum depth of the tree.
     :return: The maximum depth of the tree.
     """
-    
+
     curr_depth = get_current_depth(tree)
     if curr_depth > max_depth:
         max_depth = curr_depth
@@ -287,22 +286,22 @@ def get_current_depth(tree):
     :param tree: An individual's derivation tree.
     :return: The depth of the current node.
     """
-    
+
     # Set the initial depth at 1.
     depth = 1
-    
+
     # Set the current parent.
     current_parent = tree.parent
-    
+
     while current_parent is not None:
         # Recurse until the root node of the tree has been reached.
-        
+
         # Increment depth.
         depth += 1
-        
+
         # Set new parent.
         current_parent = current_parent.parent
-    
+
     return depth
 
 
@@ -316,7 +315,7 @@ def get_output(ind_tree):
     :param ind_tree: a full tree for which the phenotype string is to be built.
     :return: The complete built phenotype string of an individual.
     """
-    
+
     def build_output(tree):
         """
         Recursively adds all node roots to a list which can be joined to
@@ -324,21 +323,21 @@ def get_output(ind_tree):
 
         :return: The list of all node roots.
         """
-        
+
         output = []
         for child in tree.children:
             if not child.children:
                 # If the current child has no children it is a terminal.
                 # Append it to the output.
                 output.append(child.root)
-            
+
             else:
                 # Otherwise it is a non-terminal. Recurse on all
                 # non-terminals.
                 output += build_output(child)
-        
+
         return output
-    
+
     return "".join(build_output(ind_tree))
 
 
@@ -391,16 +390,16 @@ def check_tree(tree):
     :param tree: A tree.
     :return: Nothing.
     """
-    
+
     if tree.children:
-        
+
         if not tree.codon:
             s = "utilities.representation.check_methods.check_tree\n" \
                 "Error: Node with children has no associated codon."
             raise Exception(s)
-        
+
         for child in tree.children:
-            
+
             if child.parent != tree:
                 s = "utilities.representation.check_methods.check_tree\n" \
                     "Error: Child doesn't belong to parent.\n" \

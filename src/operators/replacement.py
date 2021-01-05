@@ -1,7 +1,7 @@
-from fitness.evaluation import evaluate_fitness
 from algorithm.parameters import params
-from operators.mutation import mutation
+from fitness.evaluation import evaluate_fitness
 from operators.crossover import crossover_inds
+from operators.mutation import mutation
 from operators.selection import selection
 from utilities.algorithm.NSGA2 import compute_pareto_metrics
 
@@ -35,12 +35,12 @@ def generational(new_pop, old_pop):
     # Sort both populations.
     old_pop.sort(reverse=True)
     new_pop.sort(reverse=True)
-    
+
     # Append the best ELITE_SIZE individuals from the old population to the
     # new population.
     for ind in old_pop[:params['ELITE_SIZE']]:
         new_pop.insert(0, ind)
-    
+
     # Return the top POPULATION_SIZE individuals of the new pop, including
     # elites.
     return new_pop[:params['POPULATION_SIZE']]
@@ -72,13 +72,13 @@ def steady_state(individuals):
     ind_counter = 0
 
     while ind_counter < params['POPULATION_SIZE']:
-        
+
         # Select parents from the original population.
         parents = selection(individuals)
 
         # Perform crossover on selected parents.
         cross_pop = crossover_inds(parents[0], parents[1])
-        
+
         if cross_pop is None:
             # Crossover failed.
             pass
@@ -86,16 +86,16 @@ def steady_state(individuals):
         else:
             # Mutate the new population.
             new_pop = mutation(cross_pop)
-        
+
             # Evaluate the fitness of the new population.
             new_pop = evaluate_fitness(new_pop)
-    
+
             # Sort the original population
             individuals.sort(reverse=True)
-    
+
             # Combine both populations
             total_pop = individuals[:-len(new_pop)] + new_pop
-        
+
             # Increment the ind counter
             ind_counter += params['GENERATION_SIZE']
 
@@ -130,25 +130,25 @@ def nsga2_replacement(new_pop, old_pop):
 
     while len(temp_pop) < pop_size:
         # Populate the replacement population
-        
+
         if len(pareto.fronts[i]) <= pop_size - len(temp_pop):
             temp_pop.extend(pareto.fronts[i])
-        
+
         else:
             # Sort the current pareto front with respect to crowding distance.
             pareto.fronts[i] = sorted(pareto.fronts[i],
                                       key=lambda item:
                                       pareto.crowding_distance[item])
-        
+
             # Get number of individuals to add in temp to achieve the pop_size
             diff_size = pop_size - len(temp_pop)
-            
+
             # Extend the replacement population
             temp_pop.extend(pareto.fronts[i][:diff_size])
-    
+
         # Increment counter.
         i += 1
-    
+
     return temp_pop
 
 

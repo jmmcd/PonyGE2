@@ -28,7 +28,7 @@ def evaluate_fitness(individuals):
     """
 
     results, pool = [], None
-    
+
     if params['MULTICORE']:
         pool = params['POOL']
 
@@ -67,7 +67,7 @@ def evaluate_fitness(individuals):
                     while (not ind.phenotype) or ind.phenotype in cache:
                         ind = params['MUTATION'](ind)
                         stats['regens'] += 1
-                    
+
                     # Need to overwrite the current individual in the pop.
                     individuals[name] = ind
                     ind.name = name
@@ -86,11 +86,11 @@ def evaluate_fitness(individuals):
 
             # Add the evaluated individual to the cache.
             cache[ind.phenotype] = ind.fitness
-        
+
             # Check if individual had a runtime error.
             if ind.runtime_error:
                 runtime_error_cache.append(ind.phenotype)
-                    
+
     return individuals
 
 
@@ -112,7 +112,7 @@ def eval_or_append(ind, results, pool):
         # Add the individual to the pool of jobs.
         results.append(pool.apply_async(ind.evaluate, ()))
         return results
-    
+
     else:
         # Evaluate the individual.
         ind.evaluate()
@@ -125,11 +125,10 @@ def eval_or_append(ind, results, pool):
             # The phenotype string of the individual does not appear
             # in the cache, it must be evaluated and added to the
             # cache.
-            
+
             if (isinstance(ind.fitness, list) and not
-                    any([np.isnan(i) for i in ind.fitness])) or \
+            any([np.isnan(i) for i in ind.fitness])) or \
                     (not isinstance(ind.fitness, list) and not
-                     np.isnan(ind.fitness)):
-                
+                    np.isnan(ind.fitness)):
                 # All fitnesses are valid.
                 cache[ind.phenotype] = ind.fitness

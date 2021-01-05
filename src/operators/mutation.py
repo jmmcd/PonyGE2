@@ -1,4 +1,4 @@
-from random import randint, random, choice
+from random import choice, randint, random
 
 from algorithm.parameters import params
 from representation import individual
@@ -84,7 +84,7 @@ def int_flip_per_codon(ind):
     else:
         # Default mutation events per individual is 1. Raising this number
         # will influence the mutation probability for each codon.
-        p_mut = params['MUTATION_EVENTS']/eff_length
+        p_mut = params['MUTATION_EVENTS'] / eff_length
 
     # Mutation probability works per-codon over the portion of the
     # genome as defined by the within_used flag.
@@ -117,7 +117,7 @@ def int_flip_per_ind(ind):
         return ind
 
     for _ in range(params['MUTATION_EVENTS']):
-        idx = randint(0, eff_length-1)
+        idx = randint(0, eff_length - 1)
         ind.genome[idx] = randint(0, params['CODON_SIZE'])
 
     # Re-build a new individual with the newly mutated genetic information.
@@ -148,7 +148,7 @@ def subtree(ind):
 
         # Find the list of nodes we can mutate from.
         targets = ind_tree.get_target_nodes([], target=params[
-                                          'BNF_GRAMMAR'].non_terminals)
+            'BNF_GRAMMAR'].non_terminals)
 
         # Pick a node.
         new_tree = choice(targets)
@@ -216,16 +216,16 @@ def get_effective_length(ind):
 
 def LTGE_mutation(ind):
     """Mutation in the LTGE representation."""
-    
+
     # mutate and repair.
-    g, ph = latent_tree_repair(latent_tree_mutate(ind.genome), 
+    g, ph = latent_tree_repair(latent_tree_mutate(ind.genome),
                                params['BNF_GRAMMAR'], params['MAX_TREE_DEPTH'])
 
     # wrap up in an Individual and fix up various Individual attributes
     ind = individual.Individual(g, None, False)
 
     ind.phenotype = ph
-    
+
     # number of nodes is the number of decisions in the genome
     ind.nodes = ind.used_codons = len(g)
 
@@ -234,7 +234,7 @@ def LTGE_mutation(ind):
 
     # in LTGE there are no invalid individuals
     ind.invalid = False
-    
+
     return ind
 
 

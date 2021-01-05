@@ -19,7 +19,7 @@ class base_ff:
 
     def __init__(self):
         pass
-    
+
     def __call__(self, ind, **kwargs):
         """
         
@@ -27,29 +27,29 @@ class base_ff:
         :param ind: An individual to be evaluated.
         :return: The fitness of the evaluated individual.
         """
-        
+
         try:
             # Evaluate the fitness using the evaluate() function. This function
             # can be over-written by classes which inherit from this base
             # class.
             fitness = self.evaluate(ind, **kwargs)
-        
+
         except (FloatingPointError, ZeroDivisionError, OverflowError,
                 MemoryError):
             # FP err can happen through eg overflow (lots of pow/exp calls)
             # ZeroDiv can happen when using unprotected operators
             fitness = base_ff.default_fitness
-            
+
             # These individuals are valid (i.e. not invalids), but they have
             # produced a runtime error.
             ind.runtime_error = True
-        
+
         except Exception as err:
             # Other errors should not usually happen (unless we have
             # an unprotected operator) so user would prefer to see them.
             print(err)
             raise
-                
+
         return fitness
 
     def evaluate(self, ind, **kwargs):

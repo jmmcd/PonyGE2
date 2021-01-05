@@ -1,4 +1,3 @@
-
 class RegexTest:
     """
     Class which contains a test string and matches
@@ -37,7 +36,7 @@ class RegexTest:
         :param match_ranges:
         :return:
         """
-        
+
         start = a_known_match.start()
         end = a_known_match.end()
         missing = end - start

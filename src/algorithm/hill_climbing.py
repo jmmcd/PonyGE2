@@ -1,8 +1,7 @@
 from algorithm.parameters import params
 from fitness.evaluation import evaluate_fitness
-from stats.stats import stats, get_stats
+from stats.stats import get_stats, stats
 from utilities.stats import trackers
-
 
 """Hill-climbing is just about the simplest meta-heuristic there
 is. It's of interest in GP/GE because of the lingering suspicion among
@@ -92,15 +91,15 @@ def LAHC_search_loop():
 
     # Find the best individual so far.
     best = trackers.best_ever
-    
+
     # Set history.
     Lfa = params['HILL_CLIMBING_HISTORY']
     history = [best for _ in range(Lfa)]
 
     # iters is the number of individuals examined so far.
     iters = len(individuals)
-    
-    for generation in range(1, (params['GENERATIONS']+1)):
+
+    for generation in range(1, (params['GENERATIONS'] + 1)):
 
         this_gen = []
 
@@ -119,16 +118,16 @@ def LAHC_search_loop():
             # Find the index of the relevant individual from the late
             # acceptance history.
             idx = iters % Lfa
-            
+
             if candidate_best >= history[idx]:
                 best = candidate_best  # Accept the candidate
-    
+
             else:
                 pass  # reject the candidate
 
             # Set the new best into the history.
             history[idx] = best
-            
+
             # Increment evaluation counter.
             iters += 1
 
@@ -194,7 +193,7 @@ def SCHC_search_loop():
     
     :return: The final population.
     """
-    
+
     # Calculate maximum number of evaluation iterations.
     max_its = params['POPULATION_SIZE'] * params['GENERATIONS']
     count_method = params['SCHC_COUNT_METHOD']
@@ -215,11 +214,11 @@ def SCHC_search_loop():
     # Set history and counter.
     history = params['HILL_CLIMBING_HISTORY']
     counter = 0
-    
+
     # iters is the number of individuals examined/iterations so far.
     iters = len(individuals)
-    
-    for generation in range(1, (params['GENERATIONS']+1)):
+
+    for generation in range(1, (params['GENERATIONS'] + 1)):
 
         this_gen = []
 
@@ -238,15 +237,15 @@ def SCHC_search_loop():
             # count
             if count_method == "count_all":  # we count all iterations (moves)
                 counter += 1  # increment the counter
-            
+
             elif count_method == "acp":  # we count accepted moves only
                 if candidate_best > cost_bound or candidate_best >= best:
                     counter += 1  # increment the counter
-            
+
             elif count_method == "imp":  # we count improving moves only
                 if candidate_best > best:
                     counter += 1  # increment the counter
-            
+
             else:
                 s = "algorithm.hill_climbing.SCHC_search_loop\n" \
                     "Error: Unknown count method: %s" % (count_method)
@@ -255,7 +254,7 @@ def SCHC_search_loop():
             # accept
             if candidate_best > cost_bound or candidate_best >= best:
                 best = candidate_best  # accept the candidate
-  
+
             else:
                 pass  # reject the candidate
 

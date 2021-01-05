@@ -1,4 +1,5 @@
 from sys import path
+
 path.append("../src")
 
 from utilities.algorithm.general import check_python_version
@@ -66,7 +67,7 @@ def parse_terminals(target):
                     # particular rule.
 
                     # Generate a key for the snippets repository.
-                    key = " ".join([str([idx, idx+len(T)]), NT])
+                    key = " ".join([str([idx, idx + len(T)]), NT])
 
                     # Get index of production choice.
                     index = [[sym['symbol'] for sym in choice['choice']] for
@@ -208,7 +209,7 @@ def reduce(solution):
                                 # This is a terminal, decrement by length of T.
 
                                 # Check output of target string.
-                                check = target[pre-len(NTs[item][0]):pre]
+                                check = target[pre - len(NTs[item][0]):pre]
 
                                 if check == NTs[item][0]:
                                     # We have a match.
@@ -252,7 +253,7 @@ def reduce(solution):
                                     break
 
                         # Step 2: reduce everything after the loc.
-                        for i, item in enumerate(alt_cs[loc+1:]):
+                        for i, item in enumerate(alt_cs[loc + 1:]):
 
                             if NTs[item][1] == "T":
                                 # This is a terminal, decrement by length of T.
@@ -348,7 +349,6 @@ def main():
 
 
 if __name__ == '__main__':
-
     # Set parameters
     set_params(sys.argv[1:], create_files=False)
 

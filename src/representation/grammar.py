@@ -1,5 +1,5 @@
 from math import floor
-from re import match, finditer, DOTALL, MULTILINE
+from re import DOTALL, MULTILINE, finditer, match
 from sys import maxsize
 
 from algorithm.parameters import params
@@ -167,7 +167,7 @@ class Grammar(object):
                                 self.terminals[str(i)] = \
                                     [rule.group('rulename')]
                             elif rule.group('rulename') not in \
-                                self.terminals[str(i)]:
+                                    self.terminals[str(i)]:
                                 self.terminals[str(i)].append(
                                     rule.group('rulename'))
                             tmp_productions.append({"choice": tmp_production,
@@ -195,7 +195,7 @@ class Grammar(object):
                                     self.terminals[terminalparts] = \
                                         [rule.group('rulename')]
                                 elif rule.group('rulename') not in \
-                                    self.terminals[terminalparts]:
+                                        self.terminals[terminalparts]:
                                     self.terminals[terminalparts].append(
                                         rule.group('rulename'))
                                 terminalparts = None
@@ -224,7 +224,7 @@ class Grammar(object):
                             self.terminals[terminalparts] = \
                                 [rule.group('rulename')]
                         elif rule.group('rulename') not in \
-                            self.terminals[terminalparts]:
+                                self.terminals[terminalparts]:
                             self.terminals[terminalparts].append(
                                 rule.group('rulename'))
                     tmp_productions.append({"choice": tmp_production,
@@ -387,11 +387,11 @@ class Grammar(object):
             for choice in choices:
                 # Set the maximum path to a terminal for each produciton choice
                 choice['max_path'] = max([item["min_steps"] for item in
-                                      choice['choice']])
+                                          choice['choice']])
 
             # Find shortest path to a terminal for all production choices for
             # the current NT. The shortest path will be the minimum of the
-            # maximum paths to a T for each choice over all chocies.
+            # maximum paths to a T for each choice over all choices.
             min_path = min([choice['max_path'] for choice in choices])
 
             # Set the minimum path in the self.non_terminals dict.
@@ -505,7 +505,7 @@ class Grammar(object):
                                 # each NT symbol in the original choice.
 
                                 if len(child['choice']) == 1 and \
-                                   child['choice'][0]["type"] == "T":
+                                        child['choice'][0]["type"] == "T":
                                     # If the child choice leads directly to
                                     # a single terminal, increment the
                                     # permutation count.
@@ -517,9 +517,13 @@ class Grammar(object):
                                     # Generate a key for the permutations
                                     # dictionary and increment the
                                     # permutations count there.
-                                    key = [sym['symbol'] for sym in child['choice']]
-                                    if (i - 1) in depth_per_symbol_trees[str(key)].keys():
-                                        symbol_arity_pos += depth_per_symbol_trees[str(key)][i - 1]
+                                    key = [sym['symbol'] for sym in
+                                           child['choice']]
+                                    if (i - 1) in depth_per_symbol_trees[
+                                        str(key)].keys():
+                                        symbol_arity_pos += \
+                                            depth_per_symbol_trees[str(key)][
+                                                i - 1]
 
                             # Multiply original count by new count.
                             sym_pos *= symbol_arity_pos
@@ -533,7 +537,10 @@ class Grammar(object):
             for sy in start_symbols:
                 key = [sym['symbol'] for sym in sy['choice']]
                 if str(key) in depth_per_symbol_trees:
-                    pos += depth_per_symbol_trees[str(key)][depth] if depth in depth_per_symbol_trees[str(key)] else 0
+                    pos += depth_per_symbol_trees[str(key)][depth] if depth in \
+                                                                      depth_per_symbol_trees[
+                                                                          str(
+                                                                              key)] else 0
                 else:
                     pos += 1
 

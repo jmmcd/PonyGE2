@@ -15,6 +15,7 @@ def mae(y, yhat):
 
     return np.mean(np.abs(y - yhat))
 
+
 # Set maximise attribute for mae error metric.
 mae.maximise = False
 
@@ -30,6 +31,7 @@ def rmse(y, yhat):
 
     return np.sqrt(np.mean(np.square(y - yhat)))
 
+
 # Set maximise attribute for rmse error metric.
 rmse.maximise = False
 
@@ -44,6 +46,7 @@ def mse(y, yhat):
     """
 
     return np.mean(np.square(y - yhat))
+
 
 # Set maximise attribute for mse error metric.
 mse.maximise = False
@@ -73,6 +76,7 @@ def hinge(y, yhat):
     # mean hinge loss rather than sum so that the result doesn't
     # depend on the size of the dataset.
     return np.mean(np.maximum(0, 1 - y * yhat))
+
 
 # Set maximise attribute for hinge error metric.
 hinge.maximise = False
@@ -117,6 +121,8 @@ def f1_score(y, yhat):
         # return 0. We can ignore that warning and happily return 0.
         warnings.simplefilter("ignore")
         return sklearn_f1_score(y, yhat, average="weighted")
+
+
 # Set maximise attribute for f1_score error metric.
 f1_score.maximise = True
 
@@ -128,4 +134,6 @@ def Hamming_error(y, yhat):
     Assumes both y and yhat are binary or integer-valued.
     """
     return np.sum(y != yhat)
+
+
 Hamming_error.maximise = False

@@ -1,5 +1,7 @@
 from math import ceil
+
 import numpy as np
+
 np.seterr(all="raise")
 
 
@@ -16,7 +18,7 @@ def return_one_percent(num, pop_size):
     """
 
     # Calculate one percent of the given population size.
-    percent = int(round(pop_size/100))
+    percent = int(round(pop_size / 100))
 
     # Return the biggest number.
     if percent < num:
@@ -48,7 +50,7 @@ def aq(a, b):
     :return: np.array analytic quotient, analogous to a / b.
 
     """
-    return a / np.sqrt(1.0 + b**2.0)
+    return a / np.sqrt(1.0 + b ** 2.0)
 
 
 def pdiv(x, y):
@@ -114,7 +116,7 @@ def ppow(x, y):
     :return: np.array x**y, but protected
 
     """
-    return np.abs(x)**y
+    return np.abs(x) ** y
 
 
 def ppow2(x, y):
@@ -246,5 +248,5 @@ def sci_notation(n, prec=3):
     """
     base = 10
     exponent = ilog(n, base)
-    mantissa = n / base**exponent
+    mantissa = n / base ** exponent
     return '{0:.{1}f}e{2:+d}'.format(mantissa, prec, exponent)

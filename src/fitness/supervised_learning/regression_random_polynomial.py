@@ -1,11 +1,11 @@
-from fitness.supervised_learning.regression import regression
-
-from algorithm.parameters import params
-from utilities.fitness.error_metric import rmse
-
 import itertools
 import random
+
 import numpy as np
+from algorithm.parameters import params
+from fitness.supervised_learning.regression import regression
+from utilities.fitness.error_metric import rmse
+
 
 class regression_random_polynomial(regression):
     """Fitness function for regression of random polynomials. We
@@ -39,9 +39,9 @@ class regression_random_polynomial(regression):
         # would have done.
 
         degree, n_vars, n_samples = map(int, params['EXTRA_PARAMETERS'])
-        
+
         # may be needed if the grammar uses GE_RANGE:dataset_n_vars
-        self.n_vars = n_vars 
+        self.n_vars = n_vars
 
         # Set error metric if it's not set already.
         if params['ERROR_METRIC'] is None:
@@ -55,7 +55,7 @@ class regression_random_polynomial(regression):
         # generate a set of fitness cases for training
         self.training_in = np.random.random((n_vars, n_samples))
         self.training_exp = p.eval(self.training_in)
-        
+
         # if we want a separate test set, generate a set of fitness
         # cases for it
         if params['DATASET_TEST']:
@@ -65,10 +65,9 @@ class regression_random_polynomial(regression):
 
 
 class Polynomial:
-
     """A polynomial of a given degree and a given number of variables,
     with one coefficient for each term."""
-    
+
     def __init__(self, degree, n_vars, coefs):
         """Constructor for the case where we already have coefficients."""
         self.degree = degree
@@ -78,7 +77,8 @@ class Polynomial:
     @classmethod
     def from_random(cls, degree, n_vars):
         """Constructor for the case where we want random coefficients."""
-        coefs = [2*(random.random() - 0.5) for i in Polynomial.terms(degree, n_vars)]
+        coefs = [2 * (random.random() - 0.5) for i in
+                 Polynomial.terms(degree, n_vars)]
         p = Polynomial(degree, n_vars, coefs)
         return p
 
@@ -93,24 +93,29 @@ class Polynomial:
     def eval(self, x):
         """Evaluate the polynomial at a set of points x."""
         assert x.shape[0] == self.n_vars
-        result = np.zeros(x.shape[1]) # same length as a column of x
-        for coef, pows in zip(self.coefs, self.terms(self.degree, self.n_vars)):
+        result = np.zeros(x.shape[1])  # same length as a column of x
+        for coef, pows in zip(self.coefs,
+                              self.terms(self.degree, self.n_vars)):
             tmp = np.ones(x.shape[1])
             for (xi, pow) in zip(x, pows):
                 tmp *= (xi ** pow)
             tmp *= coef
             result += tmp
         return result
-    
+
     def __str__(self):
         """Pretty-print a polynomial, rounding the coefficients."""
+
         def s(pows):
             if sum(pows):
                 return "*" + "*".join("x[%d]**%d" % (i, powi)
-                                      for i, powi in enumerate(pows) if powi > 0)
+                                      for i, powi in enumerate(pows) if
+                                      powi > 0)
             else:
-                return "" # this term is a const so the coef on its own is enough
+                # this term is a const so the coef on its own is enough
+                return ""
+
         return " + ".join("%.3f%s" % (coef, s(pows))
                           for (coef, pows) in
-                          zip(self.coefs, Polynomial.terms(self.degree, self.n_vars)))
-
+                          zip(self.coefs,
+                              Polynomial.terms(self.degree, self.n_vars)))

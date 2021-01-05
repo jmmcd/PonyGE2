@@ -1,10 +1,10 @@
+import json
+import subprocess
+import sys
+from os import path
+
 from algorithm.parameters import params
 from fitness.base_ff_classes.base_ff import base_ff
-
-from os import path
-import subprocess
-import json
-import sys
 
 
 class progsys(base_ff):
@@ -27,7 +27,7 @@ class progsys(base_ff):
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        
+
         self.training, self.test, self.embed_header, self.embed_footer = \
             self.get_data(params['DATASET_TRAIN'], params['DATASET_TEST'],
                           params['GRAMMAR_FILE'])
@@ -38,9 +38,9 @@ class progsys(base_ff):
                   "Fitness function only allows sequential evaluation.")
 
     def evaluate(self, ind, **kwargs):
-    
+
         dist = kwargs.get('dist', 'training')
-        
+
         program = self.format_program(ind.phenotype,
                                       self.embed_header, self.embed_footer)
         data = self.training if dist == "training" else self.test
@@ -49,7 +49,7 @@ class progsys(base_ff):
                                 'variables': ['cases', 'caseQuality',
                                               'quality']})
 
-        self.eval.stdin.write((eval_json+'\n').encode())
+        self.eval.stdin.write((eval_json + '\n').encode())
         self.eval.stdin.flush()
         result_json = self.eval.stdout.readline()
 
@@ -149,7 +149,7 @@ class progsys(base_ff):
         if insert > 0:
             embed_header = embed_code[:insert]
             embed_footer = embed_code[insert + len(self.INSERTCODE):]
-        with open(train_set, 'r') as train_file,\
+        with open(train_set, 'r') as train_file, \
                 open(test_set, 'r') as test_file:
             return train_file.read(), test_file.read(), \
                    embed_header, embed_footer

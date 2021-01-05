@@ -1,6 +1,6 @@
 import pickle
-from os import path
 import random
+from os import path
 
 
 def create_state(individuals):
@@ -13,7 +13,7 @@ def create_state(individuals):
     :param individuals: A population of individuals to be saved.
     :return: The complete state of a run.
     """
-    
+
     from algorithm.parameters import params
     from stats.stats import stats
     from utilities.stats import trackers
@@ -24,7 +24,7 @@ def create_state(individuals):
 
     # Get random state.
     random_state = random.getstate()
-    
+
     # Create a picklable version of the params dictionary. Since the params
     # dictionary contains functions and class instances, we need to replace
     # these with the names of their respective modules, since module
@@ -40,7 +40,7 @@ def create_state(individuals):
     state = {"trackers": pickle_trackers, "params": pickle_params,
              "stats": stats, "individuals": individuals,
              "random_state": random_state, "time": state_time}
-    
+
     save_state(state)
 
 
@@ -52,10 +52,10 @@ def save_state(state):
     :param state: A dictionary describing the current state of a run.
     :return: Nothing.
     """
-    
+
     # Create pickle file
     state_file = open(path.join(state['params']['FILE_PATH'], "state"), "wb")
-    
+
     # Save state information
     pickle.dump(state, state_file)
 
@@ -71,19 +71,19 @@ def load_state(state):
     a run.
     :return: The loaded state of a run.
     """
-    
+
     # Open pickle file
     state_file = open(state, "rb")
-    
+
     # Get state information
     loaded_state = pickle.load(state_file)
 
     # Close file.
     state_file.close()
-    
+
     # Set state.
     individuals = set_state(loaded_state)
-    
+
     # Return individuals.
     return individuals
 
@@ -110,11 +110,11 @@ def set_state(state):
 
     # Set random state.
     random.setstate(state['random_state'])
-    
+
     # Set stats.
     for stat in state['stats']:
         stats[stat] = state['stats'][stat]
-        
+
     # Set trackers.
     for tracker in state['trackers']:
         setattr(trackers, tracker, state['trackers'][tracker])
@@ -126,7 +126,7 @@ def set_state(state):
     # Set correct param imports for specified function options, including
     # error metrics and fitness functions.
     set_param_imports()
-    
+
     # Set time adjustment to account for old time.
     stats['time_adjust'] = time() - state['time']
 
@@ -142,7 +142,7 @@ def check_name(obj):
     :param obj: An object for which we want to find the name.
     :return: The name of the object
     """
-    
+
     try:
         return obj.__name__
     except AttributeError:

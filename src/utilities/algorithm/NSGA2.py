@@ -1,7 +1,7 @@
 from collections import defaultdict
-from numpy import isnan
 
 from algorithm.parameters import params
+from numpy import isnan
 from utilities.fitness.math_functions import percentile
 
 
@@ -266,7 +266,7 @@ def get_population_iqr(population, n_objectives):
 
         # Sort the population with respect to the current objective.
         sorted_pop = sorted(population, key=lambda ind:
-                            params['FITNESS_FUNCTION'].value(ind.fitness, m),
+        params['FITNESS_FUNCTION'].value(ind.fitness, m),
                             reverse=params['FITNESS_FUNCTION'].
                             fitness_functions[m].maximise)
 

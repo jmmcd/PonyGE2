@@ -1,8 +1,9 @@
-from random import randint, random, sample, choice
+from random import choice, randint, random, sample
 
 from algorithm.parameters import params
 from representation import individual
-from representation.latent_tree import latent_tree_crossover, latent_tree_repair
+from representation.latent_tree import latent_tree_crossover, \
+    latent_tree_repair
 from utilities.representation.check_methods import check_ind
 
 
@@ -20,21 +21,21 @@ def crossover(parents):
 
     # Initialise an empty population.
     cross_pop = []
-    
+
     while len(cross_pop) < params['GENERATION_SIZE']:
-        
+
         # Randomly choose two parents from the parent population.
         inds_in = sample(parents, 2)
 
         # Perform crossover on chosen parents.
         inds_out = crossover_inds(inds_in[0], inds_in[1])
-        
+
         if inds_out is None:
             # Crossover failed.
             pass
-        
+
         else:
-                        
+
             # Extend the new population.
             cross_pop.extend(inds_out)
 
@@ -96,7 +97,7 @@ def variable_onepoint(p_0, p_1):
 
     # Uniformly generate crossover points.
     max_p_0, max_p_1 = get_max_genome_index(p_0, p_1)
-        
+
     # Select unique points on each genome for crossover to occur.
     pt_0, pt_1 = randint(1, max_p_0), randint(1, max_p_1)
 
@@ -126,27 +127,27 @@ def fixed_onepoint(p_0, p_1):
     :param p_1: Parent 1
     :return: A list of crossed-over individuals.
     """
-    
+
     # Get the chromosomes.
     genome_0, genome_1 = p_0.genome, p_1.genome
 
     # Uniformly generate crossover points.
     max_p_0, max_p_1 = get_max_genome_index(p_0, p_1)
-    
+
     # Select the same point on both genomes for crossover to occur.
     pt = randint(1, min(max_p_0, max_p_1))
-    
+
     # Make new chromosomes by crossover: these slices perform copies.
     if random() < params['CROSSOVER_PROBABILITY']:
         c_0 = genome_0[:pt] + genome_1[pt:]
         c_1 = genome_1[:pt] + genome_0[pt:]
     else:
         c_0, c_1 = genome_0[:], genome_1[:]
-    
+
     # Put the new chromosomes into new individuals.
     ind_0 = individual.Individual(c_0, None)
     ind_1 = individual.Individual(c_1, None)
-    
+
     return [ind_0, ind_1]
 
 
@@ -162,7 +163,7 @@ def fixed_twopoint(p_0, p_1):
     :param p_1: Parent 1
     :return: A list of crossed-over individuals.
     """
-    
+
     genome_0, genome_1 = p_0.genome, p_1.genome
 
     # Uniformly generate crossover points.
@@ -171,7 +172,7 @@ def fixed_twopoint(p_0, p_1):
     # Select the same points on both genomes for crossover to occur.
     a, b = randint(1, max_p_0), randint(1, max_p_1)
     pt_0, pt_1 = min([a, b]), max([a, b])
-    
+
     # Make new chromosomes by crossover: these slices perform copies.
     if random() < params['CROSSOVER_PROBABILITY']:
         c_0 = genome_0[:pt_0] + genome_1[pt_0:pt_1] + genome_0[pt_1:]
@@ -182,7 +183,7 @@ def fixed_twopoint(p_0, p_1):
     # Put the new chromosomes into new individuals.
     ind_0 = individual.Individual(c_0, None)
     ind_1 = individual.Individual(c_1, None)
-    
+
     return [ind_0, ind_1]
 
 
@@ -198,29 +199,29 @@ def variable_twopoint(p_0, p_1):
     :param p_1: Parent 1
     :return: A list of crossed-over individuals.
     """
-    
+
     genome_0, genome_1 = p_0.genome, p_1.genome
-    
+
     # Uniformly generate crossover points.
     max_p_0, max_p_1 = get_max_genome_index(p_0, p_1)
-    
+
     # Select the same points on both genomes for crossover to occur.
     a_0, b_0 = randint(1, max_p_0), randint(1, max_p_1)
     a_1, b_1 = randint(1, max_p_0), randint(1, max_p_1)
     pt_0, pt_1 = min([a_0, b_0]), max([a_0, b_0])
     pt_2, pt_3 = min([a_1, b_1]), max([a_1, b_1])
-    
+
     # Make new chromosomes by crossover: these slices perform copies.
     if random() < params['CROSSOVER_PROBABILITY']:
         c_0 = genome_0[:pt_0] + genome_1[pt_2:pt_3] + genome_0[pt_1:]
         c_1 = genome_1[:pt_2] + genome_0[pt_0:pt_1] + genome_1[pt_3:]
     else:
         c_0, c_1 = genome_0[:], genome_1[:]
-    
+
     # Put the new chromosomes into new individuals.
     ind_0 = individual.Individual(c_0, None)
     ind_1 = individual.Individual(c_1, None)
-    
+
     return [ind_0, ind_1]
 
 
@@ -249,11 +250,11 @@ def subtree(p_0, p_1):
         :return: The new derivation trees after subtree crossover has been
         performed.
         """
-        
+
         # Randomly choose a non-terminal from the set of permissible
         # intersecting non-terminals.
         crossover_choice = choice(shared_nodes)
-    
+
         # Find all nodes in both trees that match the chosen crossover node.
         nodes_0 = tree0.get_target_nodes([], target=[crossover_choice])
         nodes_1 = tree1.get_target_nodes([], target=[crossover_choice])
@@ -264,12 +265,12 @@ def subtree(p_0, p_1):
         # Check the parents of both chosen subtrees.
         p0 = t0.parent
         p1 = t1.parent
-    
+
         if not p0 and not p1:
             # Crossover is between the entire tree of both tree0 and tree1.
-            
+
             return t1, t0
-        
+
         elif not p0:
             # Only t0 is the entire of tree0.
             tree0 = t1
@@ -283,7 +284,7 @@ def subtree(p_0, p_1):
             # individual, it has no parent.
             t0.parent = p1
             t1.parent = None
-    
+
         elif not p1:
             # Only t1 is the entire of tree1.
             tree1 = t0
@@ -297,24 +298,24 @@ def subtree(p_0, p_1):
             # individual, it has no parent.
             t1.parent = p0
             t0.parent = None
-    
+
         else:
             # The crossover node for both trees is not the entire tree.
-       
+
             # For the parent nodes of the original subtrees, get the indexes
             # of the original subtrees.
             i0 = p0.children.index(t0)
             i1 = p1.children.index(t1)
-        
+
             # Swap over the subtrees between parents.
             p0.children[i0] = t1
             p1.children[i1] = t0
-        
+
             # Set the parents of the crossed-over subtrees as their new
             # parents.
             t1.parent = p0
             t0.parent = p1
-        
+
         return tree0, tree1
 
     def intersect(l0, l1):
@@ -328,29 +329,29 @@ def subtree(p_0, p_1):
         :return: The sorted list of all non-terminal nodes that are in both
         derivation trees.
         """
-        
+
         # Find all intersecting elements of both sets l0 and l1.
         shared_nodes = l0.intersection(l1)
-        
+
         # Find only the non-terminals present in the intersecting set of
         # labels.
         shared_nodes = [i for i in shared_nodes if i in params[
             'BNF_GRAMMAR'].non_terminals]
-        
+
         return sorted(shared_nodes)
 
     if random() > params['CROSSOVER_PROBABILITY']:
         # Crossover is not to be performed, return entire individuals.
         ind0 = p_1
         ind1 = p_0
-    
+
     else:
         # Crossover is to be performed.
-    
+
         if p_0.invalid:
             # The individual is invalid.
             tail_0 = []
-            
+
         else:
             # Save tail of each genome.
             tail_0 = p_0.genome[p_0.used_codons:]
@@ -362,7 +363,7 @@ def subtree(p_0, p_1):
         else:
             # Save tail of each genome.
             tail_1 = p_1.genome[p_1.used_codons:]
-        
+
         # Get the set of labels of non terminals for each tree.
         labels1 = p_0.tree.get_node_labels(set())
         labels2 = p_1.tree.get_node_labels(set())
@@ -374,11 +375,11 @@ def subtree(p_0, p_1):
             # There are overlapping NTs, cross over parts of trees.
             ret_tree0, ret_tree1 = do_crossover(p_0.tree, p_1.tree,
                                                 shared_nodes)
-        
+
         else:
             # There are no overlapping NTs, cross over entire trees.
             ret_tree0, ret_tree1 = p_1.tree, p_0.tree
-        
+
         # Initialise new individuals using the new trees.
         ind0 = individual.Individual(None, ret_tree0)
         ind1 = individual.Individual(None, ret_tree1)
@@ -404,25 +405,25 @@ def get_max_genome_index(ind_0, ind_1):
 
     if params['WITHIN_USED']:
         # Get used codons range.
-        
+
         if ind_0.invalid:
             # ind_0 is invalid. Default to entire genome.
             max_p_0 = len(ind_0.genome)
-        
+
         else:
             max_p_0 = ind_0.used_codons
-    
+
         if ind_1.invalid:
             # ind_1 is invalid. Default to entire genome.
             max_p_1 = len(ind_1.genome)
-        
+
         else:
             max_p_1 = ind_1.used_codons
-    
+
     else:
         # Get length of entire genome.
         max_p_0, max_p_1 = len(ind_0.genome), len(ind_1.genome)
-        
+
     return max_p_0, max_p_1
 
 
@@ -455,11 +456,11 @@ def LTGE_crossover(p_0, p_1):
     # each key is the length of a path from root
     ind_0.depth = max(len(k) for k in g_0)
     ind_1.depth = max(len(k) for k in g_1)
-    
+
     # in LTGE there are no invalid individuals
     ind_0.invalid = False
     ind_1.invalid = False
-   
+
     return [ind_0, ind_1]
 
 

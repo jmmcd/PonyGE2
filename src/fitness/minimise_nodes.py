@@ -10,6 +10,6 @@ class minimise_nodes(base_ff):
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        
+
     def evaluate(self, ind, **kwargs):
         return ind.nodes

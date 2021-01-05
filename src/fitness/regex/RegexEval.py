@@ -2,10 +2,11 @@ import re
 from multiprocessing import Process, Queue
 
 import fitness.regex.testing.RegexTestGenerator as TestGen
-from fitness.regex.testing.RegexTimer import time_regex_test_case
 from algorithm.parameters import params
 from fitness.base_ff_classes.base_ff import base_ff
+from fitness.regex.testing.RegexTimer import time_regex_test_case
 from stats.stats import stats
+
 
 # Author: Brendan Cody-Kenny - codykenny at gmail
 
@@ -18,25 +19,25 @@ class RegexEval(base_ff):
     checked for correctness against known correct answers.
     Sum of wall-clock time taken to execute the test strings.
     """
-    
+
     # these need to be class variables, not object variables
     test_cases = []
     seed_regex = None
     time = True
     q = Queue()
     pstartup, prunner = None, None
-    
+
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        
+
         if params['MULTICORE']:
             s = "fitness.regex.RegexEval.RegexEval\n" \
                 "Error: multi-core evaluation cannot be used with RegexEval " \
                 "fitness function, as this fitness function already manages " \
                 "processes using the multiprocessing library."
             raise Exception(s)
-    
+
     def call_fitness(self, individual, q):
         """
         This method is called when this class is instantiated with an
@@ -64,7 +65,7 @@ class RegexEval(base_ff):
             # print(e)
             # traceback.print_exc()
             q.put(RegexEval.default_fitness)
-                
+
     def calculate_fitness(self, eval_results):
         """
         Sum the functionality error with time (and any other fitness penalties
@@ -73,7 +74,7 @@ class RegexEval(base_ff):
         :param eval_results:
         :return:
         """
-        
+
         result_error = 0
         time_sum = 0.0
         for a_result in eval_results:
@@ -89,7 +90,7 @@ class RegexEval(base_ff):
         :param compiled_regex:
         :return:
         """
-        
+
         results = list()
         testing_iterations = 1
 
@@ -111,18 +112,18 @@ class RegexEval(base_ff):
             # We can't initialise the seed regex when we initialise the
             # fitness function as the representation.individual.Individual
             # class has not yet been instantiated.
-            
+
             RegexEval.seed_regex = params['SEED_INDIVIDUALS'][0]
-    
+
             RegexEval.test_cases = TestGen.generate_test_suite(
                 RegexEval.seed_regex.phenotype)
-    
+
             if len(RegexEval.test_cases) == 0:
                 s = "fitness.regex.RegexEval.RegexEval\n" \
                     "Error: no regex test cases found! " \
                     "       Please add at least one passing regex test string."
                 raise Exception(s)
-        
+
         if RegexEval.pstartup is None:
             RegexEval.pstartup = Process(target=self.call_fitness,
                                          name="self.call_fitness")
@@ -132,7 +133,7 @@ class RegexEval(base_ff):
         RegexEval.prunner = RegexEval.pstartup
         RegexEval.pstartup = Process(target=self.call_fitness,
                                      name="self.call_fitness")
-        
+
         # Set one second time limit for running thread.
         self.prunner.join(1)
 
@@ -146,8 +147,8 @@ class RegexEval(base_ff):
 
             # Count individual as a runtime error.
             stats['runtime_error'] += 1
-        
+
             return self.default_fitness
-        
+
         else:
             return self.q.get()

@@ -1,7 +1,6 @@
-import scipy
-
 import re
 
+import scipy
 from algorithm.parameters import params
 from utilities.fitness.math_functions import *
 
@@ -23,7 +22,7 @@ def optimize_constants(x, y, ind):
 
     # Parse the phenotype to make the constants consecutive.
     s, n_consts = make_consts_consecutive(ind.phenotype)
-    
+
     # Create new consecutive constant attribute for individual.
     ind.phenotype_consec_consts = s
 
@@ -46,9 +45,9 @@ def optimize_constants(x, y, ind):
     # Maybe other minimizers do better with some other choices? There are other
     # methods to try out.
     init = [0.0] * n_consts
-    
+
     res = scipy.optimize.minimize(obj, init, method="L-BFGS-B")
-    
+
     # the result is accessed like a dict
     ind.opt_consts = res['x']  # the optimum values of the constants
 
@@ -92,8 +91,8 @@ def replace_consts_with_values(s, c):
     phenotype string.
     :return: The phenotype string with the constants replaced.
     """
-    
+
     for i in range(len(c)):
         s = s.replace("c[%d]" % i, str(c[i]))
-    
+
     return s

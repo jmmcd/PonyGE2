@@ -11,7 +11,7 @@ class string_match(base_ff):
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-        
+
         # Set target string.
         self.target = params['TARGET']
 

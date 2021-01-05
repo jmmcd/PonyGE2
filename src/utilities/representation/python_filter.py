@@ -9,7 +9,7 @@ def python_filter(txt):
     tmp = txt[:]
     i = 0
     while i < len(tmp):
-        tok = tmp[i:i+2]
+        tok = tmp[i:i + 2]
         if tok == "{:":
             indent_level += 1
         elif tok == ":}":

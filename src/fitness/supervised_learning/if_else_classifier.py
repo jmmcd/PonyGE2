@@ -1,11 +1,13 @@
-from fitness.supervised_learning.supervised_learning import supervised_learning
+import itertools
 
+import numpy as np
 from algorithm.parameters import params
+from fitness.supervised_learning.supervised_learning import supervised_learning
 from utilities.fitness.error_metric import Hamming_error
 
-import itertools
-import random
-import numpy as np
+
+# import random
+
 
 class if_else_classifier(supervised_learning):
     """Fitness function for if-else classifier problems. We
@@ -52,7 +54,7 @@ class if_else_classifier(supervised_learning):
         n = self.n_vars = int(params['EXTRA_PARAMETERS'][0])
         n_is = self.n_is = int(params['EXTRA_PARAMETERS'][1])
         n_os = self.n_os = int(params['EXTRA_PARAMETERS'][2])
-        
+
         # Set error metric if it's not set already.
         if params['ERROR_METRIC'] is None:
             params['ERROR_METRIC'] = Hamming_error
@@ -79,4 +81,5 @@ class if_else_classifier(supervised_learning):
 def target_classifier(n_vars, n_is, n_os):
     def target(x):
         return ((x[0] + x[1]) % n_os) + 1
+
     return target

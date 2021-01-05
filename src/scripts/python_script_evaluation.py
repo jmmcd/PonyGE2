@@ -1,10 +1,13 @@
 import json
+import logging
 import multiprocessing as mp
 import sys
 from queue import Empty
 from types import ModuleType
-import logging
-logging.basicConfig(filename='python_log.txt', format='%(asctime)s:%(process)d:%(thread)d:%(message)s', level=logging.INFO)  # set to DEBUG for debug info ;)
+
+logging.basicConfig(filename='python_log.txt',
+                    format='%(asctime)s:%(process)d:%(thread)d:%(message)s',
+                    level=logging.INFO)  # set to DEBUG for debug info ;)
 
 
 class Worker(mp.Process):
@@ -18,7 +21,8 @@ class Worker(mp.Process):
         # START LINUX: used to receive Memory Error faster in Linux
         try:
             import resource
-            resource.setrlimit(resource.RLIMIT_AS, (2 ** 30, 2 ** 30))  # 2 ** 30 == 1GB in bytes
+            resource.setrlimit(resource.RLIMIT_AS,
+                               (2 ** 30, 2 ** 30))  # 2 ** 30 == 1GB in bytes
         except ImportError:
             pass
         # END LINUX:
@@ -36,16 +40,21 @@ class Worker(mp.Process):
                 if exception:
                     self.produce.put({'exception': exception})
                 else:
-                    self.produce.put({key: value for key, value in help_globals.items()
-                                      if not callable(value) and             # cannot be a function
-                                      not isinstance(value, ModuleType) and  # cannot be a module
-                                      key not in ['__builtins__', 'stop']})  # cannot be builtins or synchronized objects
+                    self.produce.put(
+                        {key: value for key, value in help_globals.items()
+                         if not callable(value) and  # cannot be a function
+                         not isinstance(value,
+                                        ModuleType) and  # cannot be a module
+                         key not in ['__builtins__',
+                                     'stop']})  # cannot be builtins or
+                    # synchronized objects
                 del help_globals
             else:
                 break
 
     def stop_current(self):
         self.stop.value = True
+
 
 if __name__ == '__main__':
     consume = mp.Queue()
@@ -86,8 +95,9 @@ if __name__ == '__main__':
                 produce.get(block=True, timeout=message_dict['timeout'] * 10)
             except Empty:
                 # START: Used to terminate worker process if it does not return
-                # Possible reasons: OS X does not throw a MemoryError and might kill the worker itself
-                #                   worker just takes too long in general
+                # Possible reasons: OS X does not throw a MemoryError and
+                # might kill the worker itself worker just takes too long
+                # in general
                 p.terminate()
                 consume = mp.Queue()
                 produce = mp.Queue()
@@ -104,6 +114,7 @@ if __name__ == '__main__':
             ret_message_dict = {}
             for v in message_dict['variables']:
                 if v in results:
-                    ret_message_dict[v] = list(results[v]) if isinstance(results[v], set) else results[v]
+                    ret_message_dict[v] = list(results[v]) if isinstance(
+                        results[v], set) else results[v]
             print(json.dumps(ret_message_dict), flush=True)
             logging.debug('Sent output normal')

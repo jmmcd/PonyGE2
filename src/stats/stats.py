@@ -1,44 +1,43 @@
 from copy import copy
 from sys import stdout
 from time import time
-import numpy as np
 
+import numpy as np
 from algorithm.parameters import params
 from utilities.algorithm.NSGA2 import compute_pareto_metrics
 from utilities.algorithm.state import create_state
 from utilities.stats import trackers
-from utilities.stats.save_plots import save_plot_from_data, \
-    save_pareto_fitness_plot
-from utilities.stats.file_io import save_stats_to_file, save_stats_headers, \
-    save_best_ind_to_file, save_first_front_to_file
-
+from utilities.stats.file_io import save_best_ind_to_file, \
+    save_first_front_to_file, save_stats_headers, save_stats_to_file
+from utilities.stats.save_plots import save_pareto_fitness_plot, \
+    save_plot_from_data
 
 """Algorithm statistics"""
 stats = {
-        "gen": 0,
-        "total_inds": 0,
-        "regens": 0,
-        "invalids": 0,
-        "runtime_error": 0,
-        "unique_inds": len(trackers.cache),
-        "unused_search": 0,
-        "ave_genome_length": 0,
-        "max_genome_length": 0,
-        "min_genome_length": 0,
-        "ave_used_codons": 0,
-        "max_used_codons": 0,
-        "min_used_codons": 0,
-        "ave_tree_depth": 0,
-        "max_tree_depth": 0,
-        "min_tree_depth": 0,
-        "ave_tree_nodes": 0,
-        "max_tree_nodes": 0,
-        "min_tree_nodes": 0,
-        "ave_fitness": 0,
-        "best_fitness": 0,
-        "time_taken": 0,
-        "total_time": 0,
-        "time_adjust": 0
+    "gen": 0,
+    "total_inds": 0,
+    "regens": 0,
+    "invalids": 0,
+    "runtime_error": 0,
+    "unique_inds": len(trackers.cache),
+    "unused_search": 0,
+    "ave_genome_length": 0,
+    "max_genome_length": 0,
+    "min_genome_length": 0,
+    "ave_used_codons": 0,
+    "max_used_codons": 0,
+    "min_used_codons": 0,
+    "ave_tree_depth": 0,
+    "max_tree_depth": 0,
+    "min_tree_depth": 0,
+    "ave_tree_nodes": 0,
+    "max_tree_nodes": 0,
+    "min_tree_nodes": 0,
+    "ave_fitness": 0,
+    "best_fitness": 0,
+    "time_taken": 0,
+    "total_time": 0,
+    "time_adjust": 0
 }
 
 
@@ -69,7 +68,7 @@ def get_stats(individuals, end=False):
         get_soo_stats(individuals, end)
 
     if params['SAVE_STATE'] and not params['DEBUG'] and \
-                            stats['gen'] % params['SAVE_STATE_STEP'] == 0:
+            stats['gen'] % params['SAVE_STATE_STEP'] == 0:
         # Save the state of the current evolutionary run.
         create_state(individuals)
 
@@ -111,13 +110,12 @@ def get_soo_stats(individuals, end):
 
     elif not params['SILENT']:
         # Print simple display output.
-        perc = stats['gen'] / (params['GENERATIONS']+1) * 100
+        perc = stats['gen'] / (params['GENERATIONS'] + 1) * 100
         stdout.write("Evolution: %d%% complete\r" % perc)
         stdout.flush()
 
     # Generate test fitness on regression problems
     if hasattr(params['FITNESS_FUNCTION'], "training_test") and end:
-
         # Save training fitness.
         trackers.best_ever.training_fitness = copy(trackers.best_ever.fitness)
 
@@ -200,7 +198,6 @@ def get_moo_stats(individuals, end):
             # Get best fitness for each objective.
             for o, ff in \
                     enumerate(params['FITNESS_FUNCTION'].fitness_functions):
-
                 # Get sorted list of all fitness values for objective "o"
                 fits = sorted(all_arr[o], reverse=ff.maximise)
 
@@ -219,7 +216,8 @@ def get_moo_stats(individuals, end):
 
                 save_plot_from_data(to_plot, plotname)
 
-            # TODO: PonyGE2 can currently only plot moo problems with 2 objectives.
+            # TODO: PonyGE2 can currently only plot moo problems with 2
+            #  objectives.
             # Check that the number of fitness objectives is not greater than 2
             if params['FITNESS_FUNCTION'].num_obj > 2:
                 s = "stats.stats.get_moo_stats\n" \
@@ -301,7 +299,7 @@ def update_stats(individuals, end):
     if params['CACHE']:
         stats['unique_inds'] = len(trackers.cache)
         stats['unused_search'] = 100 - stats['unique_inds'] / \
-                                       stats['total_inds'] * 100
+                                 stats['total_inds'] * 100
 
     # Genome Stats
     genome_lengths = [len(i.genome) for i in individuals]

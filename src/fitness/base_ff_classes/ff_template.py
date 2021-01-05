@@ -37,10 +37,10 @@ class ff_template(base_ff):
         All fitness functions which inherit from the bass fitness function
         class must initialise the base class during their own initialisation.
         """
-        
+
         # Initialise base fitness function class.
         super().__init__()
-    
+
     def evaluate(self, ind, **kwargs):
         """
         Default fitness execution call for all fitness functions. When
@@ -57,8 +57,8 @@ class ff_template(base_ff):
         :param kwargs: Optional extra arguments.
         :return: The fitness of the evaluated individual.
         """
-        
+
         # Evaluate the fitness of the phenotype
         fitness = eval(ind.phenotype)
-        
+
         return fitness

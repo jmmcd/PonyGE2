@@ -27,10 +27,10 @@ derivation trees.
 
 """
 
+import random
 
 from algorithm.parameters import params
 from representation.derivation import legal_productions
-import random
 
 
 def latent_tree_random_ind(grammar, maxdepth, old_genome=None):
@@ -56,17 +56,17 @@ def latent_tree_random_ind(grammar, maxdepth, old_genome=None):
             name = tuple()
         elif s in gram.terminals:
             return s
-        
+
         rule = gram.rules[s]
 
         if old_genome and name in old_genome:
-            
+
             # A valid entry was found in old_genome. Apply mod rule as
             # part of repair: it will have no effect if the value is
             # already in the right range.
             gi = old_genome[name] % len(rule['choices'])
             prod = rule['choices'][gi]
-            
+
         else:
 
             # No valid entry was found, so choose a production from
@@ -74,10 +74,11 @@ def latent_tree_random_ind(grammar, maxdepth, old_genome=None):
             # finish recursion is less than or equal to max depth
             # minus our current depth).
             productions = params['BNF_GRAMMAR'].rules[s]
-            available = legal_productions("random", depth, s, productions['choices'])
-            prod = random.choice(available) # choose production
-            gi = productions['choices'].index(prod) # find its index
-            
+            available = legal_productions("random", depth, s,
+                                          productions['choices'])
+            prod = random.choice(available)  # choose production
+            gi = productions['choices'].index(prod)  # find its index
+
         genome[name] = gi
 
         # Join together all the strings for this production. For
@@ -90,7 +91,7 @@ def latent_tree_random_ind(grammar, maxdepth, old_genome=None):
                         else
                         _random_ind(gram,
                                     genome,
-                                    depth-1,
+                                    depth - 1,
                                     s["symbol"],
                                     name + ((gi, i),)))
                        for i, s in enumerate(prod['choice']))
@@ -125,7 +126,7 @@ def latent_tree_crossover(g1, g2):
     # deep_copy() is actually running, so I don't understand this
     # problem. To be on the safe side, we'll keep the copy() here.
     # See https://github.com/PonyGE/PonyGE2/issues/89.
-    c = g1.copy()   
+    c = g1.copy()
     for k in g2.keys():
         if k in g1:
             # k is in both parents so choose randomly.
@@ -144,12 +145,12 @@ def latent_tree_mutate(g):
     (possibly) large int to the corresponding small one (ie the one
     giving the same production choice) in the range of possible
     choices."""
-    
+
     # FIXME We don't rely on g being a copy, in case the search
     # algorithm sometimes mutates individuals which are original
     # members of the population.
     # See https://github.com/PonyGE/PonyGE2/issues/89.
     g = g.copy()
     k = random.choice(list(g.keys()))
-    g[k] = random.randrange(1000000) # there is no true maxint on py 3
+    g[k] = random.randrange(1000000)  # there is no true maxint on py 3
     return g

@@ -3,7 +3,6 @@ from utilities.fitness.math_functions import binary_phen_to_float
 
 
 class binary_phenotype_to_float(base_ff):
-
     """
     Fitness function for the first problem (T_1) presented in
     [Zitzler2000].
@@ -16,13 +15,12 @@ class binary_phenotype_to_float(base_ff):
     def __init__(self):
         # Initialise base fitness function class.
         super().__init__()
-    
+
     def evaluate(self, ind, **kwargs):
-        
         min_value = [0] * 30
         max_value = [1] * 30
-        
+
         real_chromosome = binary_phen_to_float(ind.phenotype, 30, min_value,
                                                max_value)
-        
+
         return real_chromosome[0]

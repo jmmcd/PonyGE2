@@ -1,12 +1,13 @@
-import matplotlib
-import pandas as pd
 from os import path, pathsep
-import numpy as np
 
+import matplotlib
+import numpy as np
+import pandas as pd
 from utilities.stats.trackers import first_pareto_list
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 plt.rc('font', family='Times New Roman')
 
 
@@ -48,7 +49,8 @@ def save_pareto_fitness_plot():
 
     # Set up colorbar instead of legend. Normalise axis to scale of data.
     sm = plt.cm.ScalarMappable(cmap="jet",
-                   norm=plt.Normalize(vmin=0, vmax=len(first_pareto_list) - 1))
+                               norm=plt.Normalize(vmin=0, vmax=len(
+                                   first_pareto_list) - 1))
 
     # Fake up the array of the scalar mappable.
     sm._A = []

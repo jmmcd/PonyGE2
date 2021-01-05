@@ -5,6 +5,7 @@ from operators.replacement import replacement, steady_state
 from operators.selection import selection
 from stats.stats import get_stats
 
+
 def step(individuals):
     """
     Runs a single generation of the evolutionary algorithm process:
@@ -35,7 +36,7 @@ def step(individuals):
 
     # Generate statistics for run so far
     get_stats(individuals)
-    
+
     return individuals
 
 
@@ -48,7 +49,7 @@ def steady_state_step(individuals):
     evolutionary generation will be imposed.
     :return: The next generation of the population.
     """
-    
+
     individuals = steady_state(individuals)
-    
-    return individuals 
+
+    return individuals

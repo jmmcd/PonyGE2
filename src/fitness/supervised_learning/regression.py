@@ -1,6 +1,5 @@
-from fitness.supervised_learning.supervised_learning import supervised_learning
-
 from algorithm.parameters import params
+from fitness.supervised_learning.supervised_learning import supervised_learning
 from utilities.fitness.error_metric import rmse
 
 

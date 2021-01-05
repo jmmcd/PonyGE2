@@ -25,7 +25,7 @@ class Individual(object):
             # The individual needs to be mapped from the given input
             # parameters.
             self.phenotype, self.genome, self.tree, self.nodes, self.invalid, \
-                self.depth, self.used_codons = mapper(genome, ind_tree)
+            self.depth, self.used_codons = mapper(genome, ind_tree)
 
         else:
             # The individual does not need to be mapped.
@@ -49,9 +49,13 @@ class Individual(object):
         greater than the comparison individual.
         """
 
-        if np.isnan(self.fitness): return True
-        elif np.isnan(other.fitness): return False
-        else: return self.fitness < other.fitness if params['FITNESS_FUNCTION'].maximise else other.fitness < self.fitness
+        if np.isnan(self.fitness):
+            return True
+        elif np.isnan(other.fitness):
+            return False
+        else:
+            return self.fitness < other.fitness if params[
+                'FITNESS_FUNCTION'].maximise else other.fitness < self.fitness
 
     def __le__(self, other):
         """
@@ -67,9 +71,13 @@ class Individual(object):
         greater than or equal to the comparison individual.
         """
 
-        if np.isnan(self.fitness): return True
-        elif np.isnan(other.fitness): return False
-        else: return self.fitness <= other.fitness if params['FITNESS_FUNCTION'].maximise else other.fitness <= self.fitness
+        if np.isnan(self.fitness):
+            return True
+        elif np.isnan(other.fitness):
+            return False
+        else:
+            return self.fitness <= other.fitness if params[
+                'FITNESS_FUNCTION'].maximise else other.fitness <= self.fitness
 
     def __str__(self):
         """

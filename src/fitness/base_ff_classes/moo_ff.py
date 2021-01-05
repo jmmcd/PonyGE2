@@ -1,4 +1,5 @@
 from math import isnan
+
 import numpy as np
 
 np.seterr(all="raise")
@@ -24,17 +25,17 @@ class moo_ff:
         # Set list of individual fitness functions.
         self.fitness_functions = fitness_functions
         self.num_obj = len(fitness_functions)
-        
+
         # Initialise individual fitness functions.
         for i, ff in enumerate(self.fitness_functions):
             self.fitness_functions[i] = ff()
-        
+
         # Set up list of default fitness values (as per individual fitness
         # functions).
         self.default_fitness = []
         for f in fitness_functions:
             self.default_fitness.append(f.default_fitness)
-        
+
     def __call__(self, ind):
         """
         Note that math functions used in the solutions are imported from either
@@ -49,7 +50,7 @@ class moo_ff:
         # made by the function multi_objc_eval, implemented by a subclass,
         # according to the problem.
         fitness = [ff(ind) for ff in self.fitness_functions]
-                     
+
         if any([isnan(i) for i in fitness]):
             # Check if any objective fitness value is NaN, if so set default
             # fitness.
@@ -68,8 +69,8 @@ class moo_ff:
         :param objective_index: The index of the desired fitness.
         :return: The fitness at the objective index of the fitness vector.
         """
-        
+
         if not isinstance(fitness_vector, list):
             return float("inf")
-        
+
         return fitness_vector[objective_index]

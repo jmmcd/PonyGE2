@@ -1,7 +1,7 @@
 import re
 
-from fitness.regex.testing.RegexTimer import time_regex_test_case
 from fitness.regex.testing.RegexTest import RegexTest
+from fitness.regex.testing.RegexTimer import time_regex_test_case
 
 
 def generate_equivalence_test_suite_replacement(a_match, compiled_regex):
@@ -25,10 +25,10 @@ def generate_equivalence_test_suite_replacement(a_match, compiled_regex):
     if len(a_match.matches) > 0:
         for i in range(0, len(a_match.search_string)):
             for char in [a for a in range(ord('0'), ord('9'))] + \
-                    [ord('a'), ord('Z')]:
+                        [ord('a'), ord('Z')]:
                 new_search_string = a_match.search_string[:i] + \
-                    chr(char) + \
-                    a_match.search_string[i + 1:]
+                                    chr(char) + \
+                                    a_match.search_string[i + 1:]
                 a_test_case_string = RegexTest(new_search_string)
                 vals = time_regex_test_case(compiled_regex, a_test_case_string,
                                             1)
@@ -92,7 +92,7 @@ def generate_test_suite(regex_string):
     :param regex_string:
     :return:
     """
-    
+
     # do some test generation
     # find a string which the regex is able to match against
     # find the minimal variant of this string which does not match
@@ -165,7 +165,7 @@ def generate_test_suite(regex_string):
         "<A_Z>           ::= A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z",
         "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z",
     ]
-    
+
     compiled_regex = re.compile(regex_string)
     test_cases = []
     for test_string in known_test_strings:
@@ -189,7 +189,7 @@ def add_re_match_to_test(matches, passing_test_string):
     :param passing_test_string:
     :return:
     """
-    
+
     for a_match in matches:  # this vals[1] business is not good
         passing_test_string.matches.append(a_match)
 
@@ -203,7 +203,7 @@ def generate_tests_if_string_match(compiled_regex, test_string):
     :param test_string:
     :return:
     """
-    
+
     test_cases = []
     a_test_candidate = RegexTest(test_string)
     vals = time_regex_test_case(compiled_regex, a_test_candidate, 1)

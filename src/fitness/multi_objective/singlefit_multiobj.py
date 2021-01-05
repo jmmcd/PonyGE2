@@ -4,8 +4,8 @@
 @17/01/18 11:09
 """
 
-from fitness.base_ff_classes.base_ff import base_ff
 import numpy as np
+from fitness.base_ff_classes.base_ff import base_ff
 
 
 class singlefit_multiobj(base_ff):
@@ -18,7 +18,6 @@ class singlefit_multiobj(base_ff):
     multi_objective = True
 
     def __init__(self):
-
         # Initialise base fitness function class.
         super().__init__()
 
@@ -28,7 +27,6 @@ class singlefit_multiobj(base_ff):
         dummyfit.maximise = True
         self.fitness_functions = [dummyfit, dummyfit]
         self.default_fitness = [float('nan'), float('nan')]
-
 
     def evaluate(self, ind, **kwargs):
         """Dummy fitness function that generates 2 fitness values"""

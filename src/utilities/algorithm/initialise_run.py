@@ -130,8 +130,9 @@ def set_param_imports():
 
                             try:
                                 # Import module and attribute and save.
-                                params[op] = return_attr_from_module(module_name,
-                                                                     attr_name)
+                                params[op] = return_attr_from_module(
+                                    module_name,
+                                    attr_name)
 
                             except Exception:
                                 s = "utilities.algorithm.initialise_run." \
@@ -156,14 +157,16 @@ def set_param_imports():
                         # step_distributed respectively
 
                         if params['MULTIAGENT'] and \
-                        ( op == 'SEARCH_LOOP' or op == 'STEP' ) :
+                                (op == 'SEARCH_LOOP' or op == 'STEP'):
                             # Define the directory structure for the multi-agent search
                             # loop and step
-                            multiagent_ops = {'search_loop':'distributed_algorithm.search_loop' \
-                                                ,'step':'distributed_algorithm.step'}
+                            multiagent_ops = {
+                                'search_loop': 'distributed_algorithm.search_loop' \
+                                , 'step': 'distributed_algorithm.step'}
 
                             # Get module and attribute names
-                            module_name = ".".join([special_ops, multiagent_ops[op.lower()]])
+                            module_name = ".".join(
+                                [special_ops, multiagent_ops[op.lower()]])
                             attr_name = split_name[-1]
 
                         else:
@@ -207,7 +210,6 @@ def get_fit_func_imports():
         # List of multiple fitness functions given.
 
         for i, name in enumerate(params[op]):
-
             # Split import name based on "." to find nested modules.
             split_name = name.strip().split(".")
 
