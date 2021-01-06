@@ -3,7 +3,7 @@
 
     Copyright (c) 2014 Michael Fenton
     Hereby licensed under the GNU GPL v3."""
-from sys import path
+from sys import path, executable
 path.append("../src")
 
 from utilities.algorithm.general import check_python_version
@@ -25,7 +25,7 @@ def execute_run(seed):
     :return: Nothing.
     """
 
-    exec_str = "python3 ponyge.py " \
+    exec_str = executable + " ponyge.py " \
                "--random_seed " + str(seed) + " " + " ".join(sys.argv[1:])
 
     call(exec_str, shell=True)

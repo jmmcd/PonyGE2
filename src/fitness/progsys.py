@@ -2,9 +2,9 @@ from algorithm.parameters import params
 from fitness.base_ff_classes.base_ff import base_ff
 
 from os import path
-import subprocess
-import json
-import sys
+from subprocess import Popen, PIPE
+from json import loads, dumps
+from sys import maxsize, executable
 
 
 class progsys(base_ff):
@@ -45,7 +45,7 @@ class progsys(base_ff):
                                       self.embed_header, self.embed_footer)
         data = self.training if dist == "training" else self.test
         program = "{}\n{}\n".format(data, program)
-        eval_json = json.dumps({'script': program, 'timeout': 1.0,
+        eval_json = dumps({'script': program, 'timeout': 1.0,
                                 'variables': ['cases', 'caseQuality',
                                               'quality']})
 
@@ -53,23 +53,21 @@ class progsys(base_ff):
         self.eval.stdin.flush()
         result_json = self.eval.stdout.readline()
 
-        result = json.loads(result_json.decode())
+        result = loads(result_json.decode())
 
         if 'exception' in result and 'JSONDecodeError' in result['exception']:
             self.eval.stdin.close()
             self.eval = self.create_eval_process()
 
         if 'quality' not in result:
-            result['quality'] = sys.maxsize
+            result['quality'] = maxsize
         return result['quality']
 
     @staticmethod
     def create_eval_process():
         """create separate python process for evaluation"""
-        return subprocess.Popen(['python',
-                                 'scripts/python_script_evaluation.py'],
-                                stdout=subprocess.PIPE,
-                                stdin=subprocess.PIPE)
+        return Popen([executable, 'scripts/python_script_evaluation.py'],
+                     stdout=PIPE, stdin=PIPE)
 
     def format_program(self, individual, header, footer):
         """formats the program by formatting the individual and adding
